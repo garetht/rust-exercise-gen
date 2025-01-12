@@ -5,6 +5,8 @@ use rand::prelude::{SliceRandom, StdRng};
 use rand::Rng;
 use std::cmp::min;
 use std::collections::HashMap;
+use crate::program_state::Mutability;
+use crate::program_state::Mutability::Defer;
 
 pub struct AvailableVariables {
     variables: Vec<VariableDeclaration>,
@@ -181,20 +183,19 @@ pub fn rand_move(
         move_expr
     };
 
-    create_call_or_assignment(&mut rng, available_variables, full_move_expr)
+    create_call_or_assignment(&mut rng, available_variables, full_move_expr, &Defer)
 }
 
 pub fn rand_borrow(
     mut rng: &mut StdRng,
     available_variables: &AvailableVariables,
+    mutability: &Mutability,
 ) -> OutlineStatement {
-    let variable_to_borrow = available_variables.variables.choose(&mut rng).unwrap();
+    let variable_to_borrow = available_variables
+        .variables
+        .choose(&mut rng).unwrap();
 
-    let is_mutable_borrow = if variable_to_borrow.left_info.is_mutable {
-        rng.gen_bool(0.5)
-    } else {
-        rng.gen_bool(0.05)
-    };
+    let is_mutable_borrow = mutability.is_mutable(rng);
 
     let base_expr_to_borrow = Expression::Name {
         name: Box::new(variable_to_borrow.clone()),
@@ -233,11 +234,11 @@ pub fn rand_borrow(
         reference_expr_to_borrow
     };
 
-    create_call_or_assignment(&mut rng, available_variables, full_borrow_expr)
+    create_call_or_assignment(&mut rng, available_variables, full_borrow_expr, mutability)
 }
 
-fn create_call_or_assignment(rng: &mut &mut StdRng, available_variables: &AvailableVariables, full_borrow_expr: Expression) -> OutlineStatement {
-    if rng.gen_bool(0.6) {
+fn create_call_or_assignment(rng: &mut StdRng, available_variables: &AvailableVariables, full_borrow_expr: Expression, mutability: &Mutability) -> OutlineStatement {
+    if rng.gen_bool(0.5) {
         OutlineStatement::FunctionCall(FunctionCall {
             arguments: vec![full_borrow_expr],
         })
@@ -249,7 +250,7 @@ fn create_call_or_assignment(rng: &mut &mut StdRng, available_variables: &Availa
                     &type_ann,
                     available_variables.next_index_for_type(&type_ann),
                 ),
-                is_mutable: false,
+                is_mutable: mutability.is_mutable(rng),
             },
             right_expression: full_borrow_expr,
         })
@@ -287,9 +288,10 @@ pub fn rand_initialize_variable(
     rng: &mut StdRng,
     available_variables: AvailableVariables,
     memory_type: &MemoryType,
+    mutability: &Mutability,
 ) -> VariableDeclaration {
     let is_vector = rng.gen_bool(0.5);
-    let is_mutable = rng.gen_bool(0.5);
+    let is_mutable = mutability.is_mutable(rng);
 
     match is_vector {
         true => {

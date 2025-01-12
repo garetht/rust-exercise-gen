@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package rust.exercises;
+
+message Exercises {
+  repeated ErrorExerciseGroup exercise_groups = 1;
+}
+
+message ErrorExerciseGroup {
+  repeated string error_codes = 1;
+  repeated Exercise exercises = 2;
+}
+
+message Exercise {
+  string formatted_program = 1;
+  repeated ErrorMessage errors = 2;
+}
+
+message ErrorMessage {
+  string message = 1;
+  ErrorMessageCode code = 2;
+  repeated ErrorMessageSpan spans = 3;
+}
+
+message ErrorMessageCode {
+  string code = 1;
+  string explanation = 2;
+}
+
+message ErrorMessageSpan {
+  uint32 line_start = 1;
+  uint32 line_end = 2;
+  uint32 column_start = 3;
+  uint32 column_end = 4;
+}
+

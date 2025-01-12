@@ -4,26 +4,26 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CompilerMessage {
-    message: String,
+    pub message: String,
     pub code: Option<DiagnosticCode>,
     pub level: String,
-    spans: Vec<DiagnosticSpan>,
+    pub spans: Vec<DiagnosticSpan>,
     children: Vec<CompilerMessage>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq, Hash)]
 pub struct DiagnosticCode {
     pub code: String,
-    explanation: Option<String>,
+    pub explanation: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DiagnosticSpan {
     file_name: String,
-    line_start: u32,
-    line_end: u32,
-    column_start: u32,
-    column_end: u32,
+    pub line_start: u32,
+    pub line_end: u32,
+    pub column_start: u32,
+    pub column_end: u32,
     text: Vec<SpanText>,
 }
 

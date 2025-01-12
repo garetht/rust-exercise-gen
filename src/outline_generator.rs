@@ -10,13 +10,20 @@ pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleto
 
         match instruction {
             // any assignments past the first may not respect the stack/heap distinction
-            ExecutionSkeleton::Init(memory_type) => {
-                let assignment = rand_initialize_variable(rng, available_variables, memory_type);
+            ExecutionSkeleton::Init(memory_type, mutability) => {
+                let assignment = rand_initialize_variable(
+                    rng,
+                    available_variables,
+                    memory_type,
+                    mutability
+                );
                 program_outline.push(OutlineStatement::VariableDeclaration(assignment.clone()));
             }
-            ExecutionSkeleton::Move => program_outline.push(rand_move(rng, &available_variables)),
-            ExecutionSkeleton::Borrow => {
-                program_outline.push(rand_borrow(rng, &available_variables));
+            ExecutionSkeleton::Move => program_outline.push(
+                rand_move(rng, &available_variables)
+            ),
+            ExecutionSkeleton::Borrow(mutability) => {
+                program_outline.push(rand_borrow(rng, &available_variables, mutability));
             }
             ExecutionSkeleton::Read(read_all) => {
                 program_outline.push(rand_read(rng, &available_variables, *read_all));

@@ -1,7 +1,7 @@
 use crate::variable::{
     Expression, FunctionCall, OutlineStatement, TypeAnnotation, VariableDeclaration,
 };
-use fake::faker::company::en::Buzzword;
+use fake::faker::company::en::BuzzwordTail;
 use fake::Fake;
 use std::collections::{HashMap, HashSet};
 
@@ -156,7 +156,7 @@ fn render_expression(expression: Expression) -> String {
             format!("{}", 42)
         }
         Expression::StringFromLiteral { .. } => {
-            format! {r#"String::from("{}")"#, Buzzword().fake::<String>().to_lowercase()}
+            format! {r#"String::from("{}")"#, BuzzwordTail().fake::<String>().to_lowercase()}
         }
         Expression::Name { name } => {
             format!("{}", name.name())
