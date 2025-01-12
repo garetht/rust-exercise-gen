@@ -1,7 +1,7 @@
 use crate::checker::{check_rust_code, CompilerMessage, DiagnosticCode};
 use crate::formatter::format_rust_code;
 use crate::outline_generator::fill_outline;
-use crate::program_generator::render_program;
+use crate::program_renderer::render_program;
 use crate::skeleton_generator::fill_skeleton;
 use crate::variable::OutlineStatement;
 use rand::prelude::StdRng;
@@ -13,7 +13,7 @@ mod checker;
 mod formatter;
 mod namer;
 mod outline_generator;
-mod program_generator;
+mod program_renderer;
 mod program_state;
 mod skeleton_generator;
 mod variable;
@@ -25,6 +25,7 @@ struct OutputProgram {
     skeleton: Vec<ExecutionSkeleton>,
     outline: Vec<OutlineStatement>,
     formatted_program: String,
+    seed: u64
 }
 
 fn main() {
@@ -32,11 +33,10 @@ fn main() {
 
     for i in 0..100 {
         let seed = 42 * i;
-        // let seed = 1764;
+        // let seed = 336;
         let mut rng = StdRng::seed_from_u64(seed);
 
         let (program, skeleton, outline, errors) = create_and_check(&mut rng);
-
         if errors.len() > 2 {
             continue;
         }
@@ -50,6 +50,7 @@ fn main() {
                     skeleton,
                     outline,
                     formatted_program: program,
+                    seed
                 });
             continue;
         }
@@ -80,13 +81,21 @@ fn main() {
                 skeleton,
                 outline,
                 formatted_program: program,
+                seed
             });
     }
+
+    // programs_by_error.iter().for_each(|p| {
+    //     println!("\n{:?} {:?}", p.0, p.1.len());
+    //     p.1.iter().for_each(|op| {
+    //         println!("{}\n {}", op.seed, op.formatted_program);
+    //     });
+    // })
 
     let program_count_by_error = programs_by_error
         .iter()
         .map(|(error, programs)| {
-            (error, programs.len(), programs.iter().map(|p| p.skeleton.clone()).collect::<Vec<_>>())
+            (error, programs.len(), programs.iter().map(|p| p.skeleton.clone()).collect::<Vec<_>>(), programs.iter().map(|p| p.formatted_program.clone()).collect::<Vec<_>>())
         })
         .collect::<Vec<_>>();
 
@@ -94,6 +103,11 @@ fn main() {
         println!("\n{:?} {:?}", pcbe.0, pcbe.1);
         pcbe.2.iter().for_each(|skeleton| {
             println!("{:?}", skeleton);
+            // if pcbe.0.len() > 0 && pcbe.0.first().unwrap() == "E0507" {
+            //     pcbe.3.iter().for_each(|program| {
+            //         println!("{}", program);
+            //     });
+            // }
         });
     })
 }

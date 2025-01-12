@@ -6,9 +6,9 @@ use crate::variable::{MemoryType, Position, VariableDeclaration};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum ExecutionSkeleton {
     Init(MemoryType),
-    Move, // should also include dereferencing moves
+    Move,
     Borrow,
-    Read,
+    Read(bool),
     Write, // i.e. a push to an array, or assigning something?
 }
 

@@ -19,18 +19,12 @@ pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleto
             ExecutionSkeleton::Borrow => {
                 program_outline.push(rand_borrow(rng, &available_variables));
             }
-            ExecutionSkeleton::Read => {
-                program_outline.push(rand_read(rng, &available_variables, false));
+            ExecutionSkeleton::Read(read_all) => {
+                program_outline.push(rand_read(rng, &available_variables, *read_all));
             }
             ExecutionSkeleton::Write => {}
         }
     }
-
-    let available_variables = calculate_available_variables(&mut program_outline);
-    if rng.gen_bool(0.5) {
-        program_outline.push(rand_read(rng, &available_variables, true));
-    }
-
     program_outline
 }
 

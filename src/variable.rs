@@ -28,8 +28,12 @@ impl AvailableVariables {
     }
 
     pub fn next_index_for_type(&self, type_annotation: &TypeAnnotation) -> u8 {
+        let annotation = match type_annotation {
+            Reference(inner) => &*inner,
+            t => t,
+        };
         self.count_by_type_class()
-            .get(type_annotation)
+            .get(annotation)
             .unwrap_or(&0)
             .clone()
     }
@@ -233,12 +237,12 @@ pub fn rand_borrow(
 }
 
 fn create_call_or_assignment(rng: &mut &mut StdRng, available_variables: &AvailableVariables, variable_to_borrow: &VariableDeclaration, full_borrow_expr: Expression) -> OutlineStatement {
-    if rng.gen_bool(0.5) {
+    if rng.gen_bool(0.6) {
         OutlineStatement::FunctionCall(FunctionCall {
             arguments: vec![full_borrow_expr],
         })
     } else {
-        let type_ann = variable_to_borrow.expr_type();
+        let type_ann = full_borrow_expr.expr_type();
         OutlineStatement::VariableDeclaration(VariableDeclaration {
             left_info: VariableInfo {
                 name: create_name(
