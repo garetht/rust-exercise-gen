@@ -36,6 +36,11 @@ pub fn generate_and_write_programs() -> std::io::Result<()> {
 fn convert_to_protobuf(programs_by_error: &mut HashMap<Vec<String>, Vec<OutputProgram>>) -> Exercises {
     let mut rng = StdRng::seed_from_u64(2048);
 
+    programs_by_error
+        .retain(|key, value| {
+            !key.contains(&String::from("E207")) && !key.contains(&String::from("E308"))
+        });
+
     for (_, output_programs) in programs_by_error.iter_mut() {
         // Modify values in-place
         output_programs.shuffle(&mut rng);
