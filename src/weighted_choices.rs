@@ -11,7 +11,7 @@ impl<T: Clone + Eq + Hash + Ord> WeightedChoices<T> {
     pub fn exponential_decreasing(max: u8) -> WeightedChoices<u8> {
         let mut choices = WeightedChoices::new();
 
-        let mut weight = 1.0;
+        let weight = 1.0;
         for i in 1..(max + 1) {
             let value = i;
             let weight = weight / 2.0;

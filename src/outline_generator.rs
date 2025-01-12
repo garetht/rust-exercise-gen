@@ -1,7 +1,6 @@
-use rand::{Rng};
-use rand::prelude::StdRng;
 use crate::program_state::ExecutionSkeleton;
-use crate::variable::{rand_borrow, rand_initialize_variable, rand_move, rand_read, AvailableVariables, OutlineStatement, VariableDeclaration};
+use crate::variable::{rand_borrow, rand_initialize_variable, rand_move, rand_read, AvailableVariables, OutlineStatement};
+use rand::prelude::StdRng;
 
 pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleton>) -> Vec<OutlineStatement> {
     let mut program_outline: Vec<OutlineStatement> = vec![];

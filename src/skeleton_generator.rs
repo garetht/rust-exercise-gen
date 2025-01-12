@@ -61,7 +61,7 @@ impl SkeletonGenerationMethods {
 }
 
 pub fn fill_skeleton(rng: &mut StdRng) -> Vec<ExecutionSkeleton> {
-    if (rng.gen_bool(0.5)) {
+    if rng.gen_bool(0.5) {
         SkeletonGenerationMethods::get_borrow_moves(rng)
     } else {
         SkeletonGenerationMethods::get_standard(rng)

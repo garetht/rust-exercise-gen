@@ -173,7 +173,7 @@ pub fn rand_move(
     let move_expr = Expression::Name {
         name: Box::new(variable_to_move.clone()),
     };
-    let full_move_expr = if (should_dereference) {
+    let full_move_expr = if should_dereference {
         Expression::Dereference {
             expression: Box::new(move_expr),
         }
@@ -181,7 +181,7 @@ pub fn rand_move(
         move_expr
     };
 
-    create_call_or_assignment(&mut rng, available_variables, variable_to_move, full_move_expr)
+    create_call_or_assignment(&mut rng, available_variables, full_move_expr)
 }
 
 pub fn rand_borrow(
@@ -190,7 +190,7 @@ pub fn rand_borrow(
 ) -> OutlineStatement {
     let variable_to_borrow = available_variables.variables.choose(&mut rng).unwrap();
 
-    let is_mutable_borrow = if (variable_to_borrow.left_info.is_mutable) {
+    let is_mutable_borrow = if variable_to_borrow.left_info.is_mutable {
         rng.gen_bool(0.5)
     } else {
         rng.gen_bool(0.05)
@@ -233,10 +233,10 @@ pub fn rand_borrow(
         reference_expr_to_borrow
     };
 
-    create_call_or_assignment(&mut rng, available_variables, variable_to_borrow, full_borrow_expr)
+    create_call_or_assignment(&mut rng, available_variables, full_borrow_expr)
 }
 
-fn create_call_or_assignment(rng: &mut &mut StdRng, available_variables: &AvailableVariables, variable_to_borrow: &VariableDeclaration, full_borrow_expr: Expression) -> OutlineStatement {
+fn create_call_or_assignment(rng: &mut &mut StdRng, available_variables: &AvailableVariables, full_borrow_expr: Expression) -> OutlineStatement {
     if rng.gen_bool(0.6) {
         OutlineStatement::FunctionCall(FunctionCall {
             arguments: vec![full_borrow_expr],

@@ -167,7 +167,7 @@ fn render_expression(expression: Expression) -> String {
         } => {
             format!(
                 "&{}{}",
-                if (is_mutable) { "mut " } else { "" },
+                if is_mutable { "mut " } else { "" },
                 render_expression(*expression)
             )
         }
@@ -199,7 +199,7 @@ fn render_expression(expression: Expression) -> String {
 fn render_variable_declaration(variable_declaration: VariableDeclaration) -> String {
     format!(
         "let {}{} : {} = {};",
-        if (variable_declaration.left_info.is_mutable) {
+        if variable_declaration.left_info.is_mutable {
             "mut "
         } else {
             ""
