@@ -43,7 +43,7 @@ fn convert_to_protobuf(
     let mut rng = StdRng::seed_from_u64(2048);
 
     programs_by_error.retain(|key, value| {
-        !key.contains(&String::from("E207")) && !key.contains(&String::from("E308"))
+        !key.contains(&String::from("E0207")) && !key.contains(&String::from("E0308")) && !key.contains(&String::from("E0277")) && key.len() == 1
     });
 
     for (_, output_programs) in programs_by_error.iter_mut() {
@@ -103,7 +103,7 @@ fn convert_to_protobuf(
 }
 
 fn group_programs_by_error() -> HashMap<Vec<String>, Vec<OutputProgram>> {
-    let results: Vec<(Vec<String>, OutputProgram)> = (0..7500)
+    let results: Vec<(Vec<String>, OutputProgram)> = (0..8000)
         .into_par_iter()
         .filter_map(|i| {
             let seed = 42 * i;

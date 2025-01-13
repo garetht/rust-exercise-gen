@@ -22,7 +22,7 @@ const CodeMirrorEditor = ({
                        overflow: 'auto',
                        border: '1px solid #333',
                        borderRadius: '8px',
-                       fontSize: '16px',
+                       fontSize: '14px',
                        textAlign: 'left',
                      }}
                      theme={bespin}
