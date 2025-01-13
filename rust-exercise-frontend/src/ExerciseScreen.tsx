@@ -40,7 +40,7 @@ function ExerciseScreen({currentExercise, correctIndices, currentIndex, totalLen
             )
           }
         </div>
-        <CodeMirrorEditor initialDoc={currentExercise.exercise.formattedProgram} plainText={false} width={600}/>
+        <CodeMirrorEditor initialDoc={currentExercise.exercise.formattedProgram} plainText={false} maxWidth="90vw"/>
         <SwitchTransition mode="out-in">
           <CSSTransition
               key={state}
@@ -98,17 +98,17 @@ function renderAnswerOptions(currentExercise: SessionExercise,
 }
 
 function renderGrading(isCorrect: boolean, humanErrors: string[], onAdvance: () => void) {
-  let noErrors = <div>
+  let noErrors = <div className="explanation-text">
     The program satisfies the borrow checker and compiles without any errors.
   </div>;
   let hasErrors = humanErrors.length === 1 ? <div className="explanation-text">
     <p>The program does not satisfy the borrow checker and the compiler produces this error:</p>
-    <CodeMirrorEditor initialDoc={humanErrors[0]} plainText={true} width={544}></CodeMirrorEditor>
+    <CodeMirrorEditor initialDoc={humanErrors[0]} plainText={true} maxWidth="calc(80vw)"></CodeMirrorEditor>
   </div> : <div className="explanation-text">
     <p>The program does not satisfy the borrow checker and the compiler produces these errors:</p>
     {
       humanErrors.map(error => {
-        return <CodeMirrorEditor initialDoc={error} plainText={true} width={544}></CodeMirrorEditor>
+        return <CodeMirrorEditor initialDoc={error} plainText={true} maxWidth="calc(80vw)"></CodeMirrorEditor>
       })
     }
   </div>;

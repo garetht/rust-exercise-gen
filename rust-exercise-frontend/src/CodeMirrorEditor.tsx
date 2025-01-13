@@ -9,16 +9,16 @@ import { bespin } from '@uiw/codemirror-themes-all';
 interface CodeMirrorProps {
   initialDoc?: string,
   plainText: boolean,
-  width: number
+  maxWidth: string
 }
 
 const CodeMirrorEditor = ({
-                            initialDoc = "", plainText = false
+                            initialDoc = "", plainText = false, maxWidth = '90vw'
                           }: CodeMirrorProps) => {
   return <CodeMirror value={initialDoc.replace(/\n+$/, '').replace(/^\n+/, '').trim()}
                      style={{
                        height: 'auto',
-                       maxWidth: '100%',
+                       maxWidth: maxWidth,
                        overflow: 'auto',
                        border: '1px solid #333',
                        borderRadius: '8px',
