@@ -6,5 +6,5 @@ import arraybuffer from "vite-plugin-arraybuffer";
 export default defineConfig({
   plugins: [react(), arraybuffer()],
   assetsInclude: ['**/*.bin'],
-
+  base: '/be-the-borrow-checker/'
 })

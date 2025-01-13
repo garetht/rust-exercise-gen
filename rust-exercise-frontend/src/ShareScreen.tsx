@@ -19,7 +19,7 @@ ${
           .join('')
   }
 
-See if you can beat my score: ${window.location.origin}`;
+See if you can beat my score: ${window.location.href}`;
 
   return (
       <>
