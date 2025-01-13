@@ -65,7 +65,11 @@ export default function App() {
             <CSSTransition
                 key={state}
                 nodeRef={nodeRef}
-                addEndListener={() => {}}
+                // @ts-ignore
+                addEndListener={(done) => {
+                  // @ts-ignore
+                  nodeRef.current.addEventListener("transitionend", done, false);
+                }}
                 classNames="fade"
             >
               <div ref={nodeRef}>
