@@ -16,15 +16,15 @@ function CopyButton({ text, className }: {text: string, className: string}) {
   };
 
   return (
-      <div
+      <button
           onClick={copyToClipboard}
           className={className}
           disabled={status === 'copied'}
       >
-        {status === 'idle' && 'Share Results'}
+        {status === 'idle' && <b>Share Results</b>}
         {status === 'copied' && '✓ Copied!'}
         {status === 'error' && '❌ Failed to copy'}
-      </div>
+      </button>
   );
 }
 

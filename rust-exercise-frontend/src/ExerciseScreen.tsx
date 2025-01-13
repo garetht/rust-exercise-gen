@@ -45,9 +45,7 @@ function ExerciseScreen({currentExercise, correctIndices, currentIndex, totalLen
           <CSSTransition
               key={state}
               nodeRef={nodeRef}
-              addEndListener={(done) => {
-                nodeRef.current.addEventListener("transitionend", done, false);
-              }}
+              addEndListener={() => {}}
               classNames="fade"
           >
             <div ref={nodeRef}>

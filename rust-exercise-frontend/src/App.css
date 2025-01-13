@@ -206,7 +206,7 @@ body {
   justify-content: center;
 }
 
-.option-button {
+.option-button, button.option-button {
   padding: 8px 12px;
   width: 572px;
   border: 2px solid white;
