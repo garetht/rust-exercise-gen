@@ -38,8 +38,8 @@ function chooseFromPool(pool: Map<string, Exercise[]>, totalNumber: number, minC
 }
 
 function createSession(easyPool: Map<string, Exercise[]>, hardPool: Map<string, Exercise[]>) {
-  return chooseFromPool(easyPool, 3, 1, 2)
-      .concat(chooseFromPool(hardPool, 2, 0, 1));
+  return chooseFromPool(easyPool, 2, 0, 1)
+      .concat(chooseFromPool(hardPool, 3, 1, 2));
 }
 
 const possibleAnswers = [
