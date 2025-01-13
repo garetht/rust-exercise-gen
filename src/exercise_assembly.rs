@@ -103,7 +103,7 @@ fn convert_to_protobuf(
 }
 
 fn group_programs_by_error() -> HashMap<Vec<String>, Vec<OutputProgram>> {
-    let results: Vec<(Vec<String>, OutputProgram)> = (0..1000)
+    let results: Vec<(Vec<String>, OutputProgram)> = (0..7500)
         .into_par_iter()
         .filter_map(|i| {
             let seed = 42 * i;

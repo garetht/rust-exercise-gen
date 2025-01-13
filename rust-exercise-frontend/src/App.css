@@ -14,7 +14,7 @@ body {
 }
 
 .grading {
-  width: 600px;
+  width: 544px;
   font-family: Inter, sans-serif;
   font-size: 16px;
   border-radius: 8px;
@@ -22,10 +22,11 @@ body {
   padding: 28px;
   text-align: left;
   margin-top: 12px;
+  color: #000;
 }
 
 .explanation-text {
-  padding: 12px 0;
+  padding-bottom: 12px;
 }
 
 .correct-grading {
@@ -207,7 +208,7 @@ body {
 
 .option-button {
   padding: 8px 12px;
-  width: 600px;
+  width: 572px;
   border: 2px solid white;
   border-radius: 8px;
   background-color: transparent;
@@ -231,7 +232,7 @@ body {
 
 pre.error {
   white-space: pre-wrap;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .result {

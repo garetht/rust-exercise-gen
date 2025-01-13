@@ -5,7 +5,6 @@ import exerciseProtos from './assets/exercises.pb.bin?uint8array';
 import {Exercise, Exercises} from "./protos/exercises.ts";
 import SplashScreen from "./SplashScreen.tsx";
 import ExerciseScreen from "./ExerciseScreen.tsx";
-import '@coreui/coreui/dist/css/coreui.min.css'
 import createSession from "./SessionCreator.tsx";
 import {ExerciseState, SessionExercise} from "./models.ts";
 import ShareScreen from "./ShareScreen.tsx";

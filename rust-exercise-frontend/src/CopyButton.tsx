@@ -16,7 +16,7 @@ function CopyButton({ text, className }: {text: string, className: string}) {
   };
 
   return (
-      <button
+      <div
           onClick={copyToClipboard}
           className={className}
           disabled={status === 'copied'}
@@ -24,7 +24,7 @@ function CopyButton({ text, className }: {text: string, className: string}) {
         {status === 'idle' && 'Share Results'}
         {status === 'copied' && '✓ Copied!'}
         {status === 'error' && '❌ Failed to copy'}
-      </button>
+      </div>
   );
 }
 
