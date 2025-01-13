@@ -2,7 +2,7 @@ import './App.css'
 
 function SplashScreen({onStartExercises}: {onStartExercises: () => void}) {
   return (
-    <>
+    <div className="splash-screen">
       <div className="splash-title">Be the Borrow Checker</div>
       <div className="splash-text">
         Test your ability to find ownership errors in Rust programs!
@@ -10,7 +10,7 @@ function SplashScreen({onStartExercises}: {onStartExercises: () => void}) {
       <div className="splash-button" onClick={onStartExercises}>
         Start
       </div>
-    </>
+    </div>
   )
 }
 

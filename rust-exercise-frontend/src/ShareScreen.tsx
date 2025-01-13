@@ -22,7 +22,7 @@ ${
 See if you can beat my score: ${window.location.href}`;
 
   return (
-      <>
+      <div className="share-screen">
         <div className="result">
           You got {correctIndices.length} out of {sessionLength} right!
         </div>
@@ -30,7 +30,7 @@ See if you can beat my score: ${window.location.href}`;
         <div className="option-button" onClick={onRestart}>
           Restart
         </div>
-      </>
+      </div>
   )
 }
 

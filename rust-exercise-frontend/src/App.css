@@ -1,20 +1,21 @@
 #root {
+  display: flex;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
-.card {
-  padding: 2em;
+body {
+  background: linear-gradient(135deg, rgba(159, 68, 15, 1) 0%, rgba(163, 111, 44, 1) 100%);
+  display: flex;
+  justify-content: center;
 }
 
-body {
-  background: linear-gradient(135deg, rgba(159, 68, 15, 1) 0%, rgba(163, 111, 44, 1) 100%)
+.main-container {
+  display: flex;
 }
 
 .grading {
-  width: 544px;
   font-family: Inter, sans-serif;
   font-size: 16px;
   border-radius: 8px;
@@ -41,8 +42,14 @@ body {
   font-size: 20px;
 }
 
+.splash-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .splash-title {
-  font-size: 5em;
+  font-size: 4em;
   font-family: Inter, sans-serif;
   font-weight: 700;
   line-height: 1em;
@@ -50,7 +57,7 @@ body {
 }
 
 .splash-text {
-  font-size: 26px;
+  font-size: 1.25em;
   font-family: Inter, sans-serif;
   font-weight: 400;
   margin: 0.5em 0;
@@ -178,6 +185,8 @@ body {
 }
 
 .exercise-screen {
+  margin-top: 0;
+  margin-bottom: auto;
   display: flex;
   flex-direction: column;
 }
@@ -208,7 +217,6 @@ body {
 
 .option-button, button.option-button {
   padding: 8px 12px;
-  width: 572px;
   border: 2px solid white;
   border-radius: 8px;
   background-color: transparent;
@@ -235,19 +243,24 @@ pre.error {
   margin: 0;
 }
 
+.share-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .result {
   font-size: 40px;
   font-weight: 700;
   color: #fff;
-  padding: 24px 0;
+  padding-bottom: 24px;
 }
 
 .exercise-indicators {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: 24px 96px;
-
+  margin: 1em 2em 2em 2em;
 }
 
 .exercise-indicator {

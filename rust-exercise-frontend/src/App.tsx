@@ -60,44 +60,42 @@ export default function App() {
 
   return (
       <>
-        <div className="main">
-          <SwitchTransition mode="out-in">
-            <CSSTransition
-                key={state}
-                nodeRef={nodeRef}
+        <SwitchTransition mode="out-in">
+          <CSSTransition
+              key={state}
+              nodeRef={nodeRef}
+              // @ts-ignore
+              addEndListener={(done) => {
                 // @ts-ignore
-                addEndListener={(done) => {
-                  // @ts-ignore
-                  nodeRef.current.addEventListener("transitionend", done, false);
-                }}
-                classNames="fade"
-            >
-              <div ref={nodeRef}>
-                {(() => {
-                  switch (state) {
-                    case 'splash':
-                      return <SplashScreen onStartExercises={onStart}/>;
-                    case 'in-progress':
-                      return <ExerciseScreen
-                          onAdvance={onAdvance}
-                          correctIndices={correctIndices}
-                          currentIndex={sessionIndex}
-                          totalLength={session.length}
-                          currentExercise={session[sessionIndex]}
-                      />;
-                    case 'completed':
-                      return <ShareScreen
-                          correctIndices={correctIndices}
-                          sessionLength={session.length}
-                          onRestart={onStart}/>;
-                    default:
-                      return null;
-                  }
-                })()}
-              </div>
-            </CSSTransition>
-          </SwitchTransition>
-        </div>
+                nodeRef.current.addEventListener("transitionend", done, false);
+              }}
+              classNames="fade"
+          >
+            <div className="main-container" ref={nodeRef}>
+              {(() => {
+                switch (state) {
+                  case 'splash':
+                    return <SplashScreen onStartExercises={onStart}/>;
+                  case 'in-progress':
+                    return <ExerciseScreen
+                        onAdvance={onAdvance}
+                        correctIndices={correctIndices}
+                        currentIndex={sessionIndex}
+                        totalLength={session.length}
+                        currentExercise={session[sessionIndex]}
+                    />;
+                  case 'completed':
+                    return <ShareScreen
+                        correctIndices={correctIndices}
+                        sessionLength={session.length}
+                        onRestart={onStart}/>;
+                  default:
+                    return null;
+                }
+              })()}
+            </div>
+          </CSSTransition>
+        </SwitchTransition>
       </>
   );
 }

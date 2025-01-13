@@ -13,12 +13,12 @@ interface CodeMirrorProps {
 }
 
 const CodeMirrorEditor = ({
-                            initialDoc = "", plainText = false, width = 600
+                            initialDoc = "", plainText = false
                           }: CodeMirrorProps) => {
   return <CodeMirror value={initialDoc.replace(/\n+$/, '').replace(/^\n+/, '').trim()}
                      style={{
                        height: 'auto',
-                       width: `${width}px`,
+                       maxWidth: '100%',
                        overflow: 'auto',
                        border: '1px solid #333',
                        borderRadius: '8px',
