@@ -43,7 +43,7 @@ fn convert_to_protobuf(
     let mut rng = StdRng::seed_from_u64(2048);
 
     programs_by_error.retain(|key, value| {
-        !key.contains(&String::from("E0207")) && !key.contains(&String::from("E0308")) && !key.contains(&String::from("E0277")) && key.len() == 1
+        !key.contains(&String::from("E0207")) && !key.contains(&String::from("E0308")) && !key.contains(&String::from("E0277")) && key.len() <= 1
     });
 
     for (_, output_programs) in programs_by_error.iter_mut() {
