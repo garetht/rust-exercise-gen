@@ -1,6 +1,7 @@
+use crate::char_utils::extract_error_blocks;
+use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::process::{Command, Stdio};
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CompilerMessage {
@@ -34,28 +35,79 @@ pub struct SpanText {
     highlight_end: u32,
 }
 
-pub fn check_rust_code(code: &str) -> Result<Vec<CompilerMessage>, Box<dyn std::error::Error>> {
-    let mut child = Command::new("rustc")
-        .arg("-")  // Read from stdin
+trait CommandExt {
+    fn add_edition(&mut self) -> &mut Self;
+    fn add_allowable_lints(&mut self) -> &mut Self;
+}
+
+impl CommandExt for Command {
+    fn add_edition(&mut self) -> &mut Self {
+        self.arg("--edition=2021")
+    }
+
+    fn add_allowable_lints(&mut self) -> &mut Self {
+        self.arg("--allow=unused_mut")
+            .arg("--allow=unused_variables")
+            .arg("--allow=dead_code")
+            .arg("--allow=unused_must_use")
+    }
+}
+
+pub fn check_rust_code(
+    code: &str,
+) -> Result<(Vec<CompilerMessage>, Vec<String>), Box<dyn std::error::Error>> {
+    let mut json_command = Command::new("rustc")
+        .arg("-") // Read from stdin
         .arg("--error-format=json")
-        .arg("-o").arg("-")  // Output to stdout (though we'll ignore it)
+        .add_edition()
+        .add_allowable_lints()
+        .arg("-o")
+        .arg("-") // Output to stdout (though we'll ignore it)
         .stdin(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?;
 
     // Write code to stdin
-    if let Some(mut stdin) = child.stdin.take() {
+    if let Some(mut stdin) = json_command.stdin.take() {
         stdin.write_all(code.as_bytes())?;
     }
 
-    let output = child.wait_with_output()?;
+    let output = json_command.wait_with_output()?;
 
     // Parse error messages
     let messages: Vec<CompilerMessage> = String::from_utf8(output.stderr)?
         .lines()
         .filter(|line| !line.is_empty())
         .filter_map(|line| serde_json::from_str(line).ok())
+        .filter(|message: &CompilerMessage| {
+            message.level == String::from("error") && !message.code.is_none()
+        })
         .collect();
 
-    Ok(messages)
+    let mut human_command = Command::new("rustc")
+        .arg("-") // Read from stdin
+        .arg("-o").arg("-") // Output to stdout (though we'll ignore it)
+        .add_edition()
+        .add_allowable_lints()
+        .stdin(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+
+    // Write code to stdin
+    if let Some(mut stdin) = human_command.stdin.take() {
+        stdin.write_all(code.as_bytes())?;
+    }
+
+    let output = human_command.wait_with_output()?;
+    let string_output = String::from_utf8(output.stderr)?;
+    let error_blocks = extract_error_blocks(&string_output);
+
+    if error_blocks.len() != messages.len() {
+        println!("Error blocks len: {:?}", error_blocks.len());
+        println!("Messages len: {:?}", messages.len());
+        println!("Error blocks: {:?}", error_blocks);
+        println!("Messages: {:?}", messages);
+        println!("Mismatch between error blocks and messages");
+    }
+    Ok((messages, error_blocks))
 }

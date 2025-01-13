@@ -3,6 +3,8 @@ use std::process::{Command, Stdio};
 
 pub fn format_rust_code(code: &str) -> Result<String, std::io::Error> {
     let mut child = Command::new("rustfmt")
+        .arg("--config")
+        .arg("max_width=55")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()?;

@@ -1,12 +1,12 @@
 use crate::namer::create_name;
+use crate::program_state::Mutability;
+use crate::program_state::Mutability::Defer;
 use crate::variable::TypeAnnotation::{Reference, Vector};
 use crate::weighted_choices::WeightedChoices;
 use rand::prelude::{SliceRandom, StdRng};
 use rand::Rng;
 use std::cmp::min;
 use std::collections::HashMap;
-use crate::program_state::Mutability;
-use crate::program_state::Mutability::Defer;
 
 pub struct AvailableVariables {
     variables: Vec<VariableDeclaration>,
@@ -15,6 +15,16 @@ pub struct AvailableVariables {
 impl AvailableVariables {
     pub fn new(variables: Vec<VariableDeclaration>) -> Self {
         Self { variables }
+    }
+
+    pub fn names(&self) -> Vec<String> {
+        let mut raw_names: Vec<String> = self
+            .variables
+            .iter()
+            .map(|v| v.left_info.name.clone())
+            .collect();
+        raw_names.dedup();
+        raw_names
     }
 
     fn count_by_type_class(&self) -> HashMap<TypeAnnotation, u8> {
@@ -59,7 +69,7 @@ pub enum TypeAnnotation {
     Vector(Box<TypeAnnotation>),
     Int32,
     String,
-    Slice
+    Slice,
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
@@ -123,7 +133,7 @@ impl Expression {
                 Vector(annotation) => *annotation,
                 _ => panic!("Cannot index non-vector {:?}", expression),
             },
-            Expression::SliceAccess { .. } => TypeAnnotation::Slice
+            Expression::SliceAccess { .. } => TypeAnnotation::Slice,
         }
     }
 }
@@ -166,11 +176,12 @@ pub fn rand_move(
 ) -> OutlineStatement {
     let variable_to_move = available_variables.variables.choose(&mut rng).unwrap();
 
-    let should_dereference = if let Expression::Reference { .. } = &variable_to_move.right_expression {
-        true
-    } else {
-        false
-    };
+    let should_dereference =
+        if let Expression::Reference { .. } = &variable_to_move.right_expression {
+            true
+        } else {
+            false
+        };
 
     let move_expr = Expression::Name {
         name: Box::new(variable_to_move.clone()),
@@ -191,9 +202,7 @@ pub fn rand_borrow(
     available_variables: &AvailableVariables,
     mutability: &Mutability,
 ) -> OutlineStatement {
-    let variable_to_borrow = available_variables
-        .variables
-        .choose(&mut rng).unwrap();
+    let variable_to_borrow = available_variables.variables.choose(&mut rng).unwrap();
 
     let is_mutable_borrow = mutability.is_mutable(rng);
 
@@ -215,7 +224,7 @@ pub fn rand_borrow(
                 is_mutable: is_mutable_borrow,
             }
         } else {
-           reference_expr_to_borrow
+            reference_expr_to_borrow
         }
     } else if let TypeAnnotation::String { .. } = borrow_type {
         if rng.gen_bool(0.5) {
@@ -223,7 +232,7 @@ pub fn rand_borrow(
                 expression: Box::new(Expression::SliceAccess {
                     expression: Box::new(base_expr_to_borrow),
                     start_index: None,
-                    end_index: None
+                    end_index: None,
                 }),
                 is_mutable: is_mutable_borrow,
             }
@@ -237,7 +246,12 @@ pub fn rand_borrow(
     create_call_or_assignment(&mut rng, available_variables, full_borrow_expr, mutability)
 }
 
-fn create_call_or_assignment(rng: &mut StdRng, available_variables: &AvailableVariables, full_borrow_expr: Expression, mutability: &Mutability) -> OutlineStatement {
+fn create_call_or_assignment(
+    rng: &mut StdRng,
+    available_variables: &AvailableVariables,
+    full_borrow_expr: Expression,
+    mutability: &Mutability,
+) -> OutlineStatement {
     if rng.gen_bool(0.5) {
         OutlineStatement::FunctionCall(FunctionCall {
             arguments: vec![full_borrow_expr],

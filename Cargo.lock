@@ -460,6 +460,7 @@ dependencies = [
  "protoc-bin-vendored",
  "rand",
  "rayon",
+ "regex",
  "serde",
  "serde_json",
 ]

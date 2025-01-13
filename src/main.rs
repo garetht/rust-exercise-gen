@@ -1,4 +1,4 @@
-use crate::exercise_assembly::{generate_and_write_programs};
+use crate::exercise_assembly::{generate_and_write_programs_to_file};
 
 mod checker;
 mod formatter;
@@ -11,7 +11,8 @@ mod variable;
 mod weighted_choices;
 mod exercise_assembly;
 mod protos;
+mod char_utils;
 
 fn main() {
-    generate_and_write_programs();
+    generate_and_write_programs_to_file();
 }

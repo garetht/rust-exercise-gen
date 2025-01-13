@@ -2,7 +2,7 @@ use crate::program_state::ExecutionSkeleton;
 use crate::variable::{rand_borrow, rand_initialize_variable, rand_move, rand_read, AvailableVariables, OutlineStatement};
 use rand::prelude::StdRng;
 
-pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleton>) -> Vec<OutlineStatement> {
+pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleton>) -> (Vec<OutlineStatement>, AvailableVariables) {
     let mut program_outline: Vec<OutlineStatement> = vec![];
     for instruction in execution_skeletion {
         // match all variable assignments and extract them
@@ -31,7 +31,8 @@ pub fn fill_outline(rng: &mut StdRng, execution_skeletion: &Vec<ExecutionSkeleto
             ExecutionSkeleton::Write => {}
         }
     }
-    program_outline
+    let available_variables = calculate_available_variables(&program_outline);
+    (program_outline, available_variables)
 }
 
 fn calculate_available_variables(program_outline: &Vec<OutlineStatement>) -> AvailableVariables {

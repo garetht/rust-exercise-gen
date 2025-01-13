@@ -10,6 +10,7 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 export const protobufPackage = "rust.exercises";
 
 export interface Exercises {
+  /** Rust explanation map?? but we'd need formatting */
   exerciseGroups: ErrorExerciseGroup[];
 }
 
@@ -20,25 +21,28 @@ export interface ErrorExerciseGroup {
 
 export interface Exercise {
   formattedProgram: string;
+  /**
+   * Available variable names in the program. Used for creating
+   * distractors
+   */
+  variableNames: string[];
   errors: ErrorMessage[];
+  humanErrors: string[];
+  /**
+   * How many primitive units are in this program. Used for
+   * starting with simpler programs
+   */
+  programLength: number;
 }
 
 export interface ErrorMessage {
   message: string;
+  implicatedVariableNames: string[];
   code: ErrorMessageCode | undefined;
-  spans: ErrorMessageSpan[];
 }
 
 export interface ErrorMessageCode {
   code: string;
-  explanation: string;
-}
-
-export interface ErrorMessageSpan {
-  lineStart: number;
-  lineEnd: number;
-  columnStart: number;
-  columnEnd: number;
 }
 
 function createBaseExercises(): Exercises {
@@ -184,7 +188,7 @@ export const ErrorExerciseGroup: MessageFns<ErrorExerciseGroup> = {
 };
 
 function createBaseExercise(): Exercise {
-  return { formattedProgram: "", errors: [] };
+  return { formattedProgram: "", variableNames: [], errors: [], humanErrors: [], programLength: 0 };
 }
 
 export const Exercise: MessageFns<Exercise> = {
@@ -192,8 +196,17 @@ export const Exercise: MessageFns<Exercise> = {
     if (message.formattedProgram !== "") {
       writer.uint32(10).string(message.formattedProgram);
     }
+    for (const v of message.variableNames) {
+      writer.uint32(18).string(v!);
+    }
     for (const v of message.errors) {
-      ErrorMessage.encode(v!, writer.uint32(18).fork()).join();
+      ErrorMessage.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.humanErrors) {
+      writer.uint32(34).string(v!);
+    }
+    if (message.programLength !== 0) {
+      writer.uint32(40).int32(message.programLength);
     }
     return writer;
   },
@@ -218,7 +231,31 @@ export const Exercise: MessageFns<Exercise> = {
             break;
           }
 
+          message.variableNames.push(reader.string());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
           message.errors.push(ErrorMessage.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.humanErrors.push(reader.string());
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.programLength = reader.int32();
           continue;
         }
       }
@@ -233,7 +270,14 @@ export const Exercise: MessageFns<Exercise> = {
   fromJSON(object: any): Exercise {
     return {
       formattedProgram: isSet(object.formattedProgram) ? globalThis.String(object.formattedProgram) : "",
+      variableNames: globalThis.Array.isArray(object?.variableNames)
+        ? object.variableNames.map((e: any) => globalThis.String(e))
+        : [],
       errors: globalThis.Array.isArray(object?.errors) ? object.errors.map((e: any) => ErrorMessage.fromJSON(e)) : [],
+      humanErrors: globalThis.Array.isArray(object?.humanErrors)
+        ? object.humanErrors.map((e: any) => globalThis.String(e))
+        : [],
+      programLength: isSet(object.programLength) ? globalThis.Number(object.programLength) : 0,
     };
   },
 
@@ -242,8 +286,17 @@ export const Exercise: MessageFns<Exercise> = {
     if (message.formattedProgram !== "") {
       obj.formattedProgram = message.formattedProgram;
     }
+    if (message.variableNames?.length) {
+      obj.variableNames = message.variableNames;
+    }
     if (message.errors?.length) {
       obj.errors = message.errors.map((e) => ErrorMessage.toJSON(e));
+    }
+    if (message.humanErrors?.length) {
+      obj.humanErrors = message.humanErrors;
+    }
+    if (message.programLength !== 0) {
+      obj.programLength = Math.round(message.programLength);
     }
     return obj;
   },
@@ -254,13 +307,16 @@ export const Exercise: MessageFns<Exercise> = {
   fromPartial<I extends Exact<DeepPartial<Exercise>, I>>(object: I): Exercise {
     const message = createBaseExercise();
     message.formattedProgram = object.formattedProgram ?? "";
+    message.variableNames = object.variableNames?.map((e) => e) || [];
     message.errors = object.errors?.map((e) => ErrorMessage.fromPartial(e)) || [];
+    message.humanErrors = object.humanErrors?.map((e) => e) || [];
+    message.programLength = object.programLength ?? 0;
     return message;
   },
 };
 
 function createBaseErrorMessage(): ErrorMessage {
-  return { message: "", code: undefined, spans: [] };
+  return { message: "", implicatedVariableNames: [], code: undefined };
 }
 
 export const ErrorMessage: MessageFns<ErrorMessage> = {
@@ -268,11 +324,11 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
     if (message.message !== "") {
       writer.uint32(10).string(message.message);
     }
-    if (message.code !== undefined) {
-      ErrorMessageCode.encode(message.code, writer.uint32(18).fork()).join();
+    for (const v of message.implicatedVariableNames) {
+      writer.uint32(18).string(v!);
     }
-    for (const v of message.spans) {
-      ErrorMessageSpan.encode(v!, writer.uint32(26).fork()).join();
+    if (message.code !== undefined) {
+      ErrorMessageCode.encode(message.code, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -297,7 +353,7 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
             break;
           }
 
-          message.code = ErrorMessageCode.decode(reader, reader.uint32());
+          message.implicatedVariableNames.push(reader.string());
           continue;
         }
         case 3: {
@@ -305,7 +361,7 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
             break;
           }
 
-          message.spans.push(ErrorMessageSpan.decode(reader, reader.uint32()));
+          message.code = ErrorMessageCode.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -320,8 +376,10 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
   fromJSON(object: any): ErrorMessage {
     return {
       message: isSet(object.message) ? globalThis.String(object.message) : "",
+      implicatedVariableNames: globalThis.Array.isArray(object?.implicatedVariableNames)
+        ? object.implicatedVariableNames.map((e: any) => globalThis.String(e))
+        : [],
       code: isSet(object.code) ? ErrorMessageCode.fromJSON(object.code) : undefined,
-      spans: globalThis.Array.isArray(object?.spans) ? object.spans.map((e: any) => ErrorMessageSpan.fromJSON(e)) : [],
     };
   },
 
@@ -330,11 +388,11 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
     if (message.message !== "") {
       obj.message = message.message;
     }
+    if (message.implicatedVariableNames?.length) {
+      obj.implicatedVariableNames = message.implicatedVariableNames;
+    }
     if (message.code !== undefined) {
       obj.code = ErrorMessageCode.toJSON(message.code);
-    }
-    if (message.spans?.length) {
-      obj.spans = message.spans.map((e) => ErrorMessageSpan.toJSON(e));
     }
     return obj;
   },
@@ -345,25 +403,22 @@ export const ErrorMessage: MessageFns<ErrorMessage> = {
   fromPartial<I extends Exact<DeepPartial<ErrorMessage>, I>>(object: I): ErrorMessage {
     const message = createBaseErrorMessage();
     message.message = object.message ?? "";
+    message.implicatedVariableNames = object.implicatedVariableNames?.map((e) => e) || [];
     message.code = (object.code !== undefined && object.code !== null)
       ? ErrorMessageCode.fromPartial(object.code)
       : undefined;
-    message.spans = object.spans?.map((e) => ErrorMessageSpan.fromPartial(e)) || [];
     return message;
   },
 };
 
 function createBaseErrorMessageCode(): ErrorMessageCode {
-  return { code: "", explanation: "" };
+  return { code: "" };
 }
 
 export const ErrorMessageCode: MessageFns<ErrorMessageCode> = {
   encode(message: ErrorMessageCode, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.code !== "") {
       writer.uint32(10).string(message.code);
-    }
-    if (message.explanation !== "") {
-      writer.uint32(18).string(message.explanation);
     }
     return writer;
   },
@@ -383,14 +438,6 @@ export const ErrorMessageCode: MessageFns<ErrorMessageCode> = {
           message.code = reader.string();
           continue;
         }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.explanation = reader.string();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -401,19 +448,13 @@ export const ErrorMessageCode: MessageFns<ErrorMessageCode> = {
   },
 
   fromJSON(object: any): ErrorMessageCode {
-    return {
-      code: isSet(object.code) ? globalThis.String(object.code) : "",
-      explanation: isSet(object.explanation) ? globalThis.String(object.explanation) : "",
-    };
+    return { code: isSet(object.code) ? globalThis.String(object.code) : "" };
   },
 
   toJSON(message: ErrorMessageCode): unknown {
     const obj: any = {};
     if (message.code !== "") {
       obj.code = message.code;
-    }
-    if (message.explanation !== "") {
-      obj.explanation = message.explanation;
     }
     return obj;
   },
@@ -424,115 +465,6 @@ export const ErrorMessageCode: MessageFns<ErrorMessageCode> = {
   fromPartial<I extends Exact<DeepPartial<ErrorMessageCode>, I>>(object: I): ErrorMessageCode {
     const message = createBaseErrorMessageCode();
     message.code = object.code ?? "";
-    message.explanation = object.explanation ?? "";
-    return message;
-  },
-};
-
-function createBaseErrorMessageSpan(): ErrorMessageSpan {
-  return { lineStart: 0, lineEnd: 0, columnStart: 0, columnEnd: 0 };
-}
-
-export const ErrorMessageSpan: MessageFns<ErrorMessageSpan> = {
-  encode(message: ErrorMessageSpan, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.lineStart !== 0) {
-      writer.uint32(8).uint32(message.lineStart);
-    }
-    if (message.lineEnd !== 0) {
-      writer.uint32(16).uint32(message.lineEnd);
-    }
-    if (message.columnStart !== 0) {
-      writer.uint32(24).uint32(message.columnStart);
-    }
-    if (message.columnEnd !== 0) {
-      writer.uint32(32).uint32(message.columnEnd);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ErrorMessageSpan {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseErrorMessageSpan();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 8) {
-            break;
-          }
-
-          message.lineStart = reader.uint32();
-          continue;
-        }
-        case 2: {
-          if (tag !== 16) {
-            break;
-          }
-
-          message.lineEnd = reader.uint32();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.columnStart = reader.uint32();
-          continue;
-        }
-        case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.columnEnd = reader.uint32();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ErrorMessageSpan {
-    return {
-      lineStart: isSet(object.lineStart) ? globalThis.Number(object.lineStart) : 0,
-      lineEnd: isSet(object.lineEnd) ? globalThis.Number(object.lineEnd) : 0,
-      columnStart: isSet(object.columnStart) ? globalThis.Number(object.columnStart) : 0,
-      columnEnd: isSet(object.columnEnd) ? globalThis.Number(object.columnEnd) : 0,
-    };
-  },
-
-  toJSON(message: ErrorMessageSpan): unknown {
-    const obj: any = {};
-    if (message.lineStart !== 0) {
-      obj.lineStart = Math.round(message.lineStart);
-    }
-    if (message.lineEnd !== 0) {
-      obj.lineEnd = Math.round(message.lineEnd);
-    }
-    if (message.columnStart !== 0) {
-      obj.columnStart = Math.round(message.columnStart);
-    }
-    if (message.columnEnd !== 0) {
-      obj.columnEnd = Math.round(message.columnEnd);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ErrorMessageSpan>, I>>(base?: I): ErrorMessageSpan {
-    return ErrorMessageSpan.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ErrorMessageSpan>, I>>(object: I): ErrorMessageSpan {
-    const message = createBaseErrorMessageSpan();
-    message.lineStart = object.lineStart ?? 0;
-    message.lineEnd = object.lineEnd ?? 0;
-    message.columnStart = object.columnStart ?? 0;
-    message.columnEnd = object.columnEnd ?? 0;
     return message;
   },
 };

@@ -1,62 +1,38 @@
-import {useEffect, useRef} from 'react'
 import {EditorState} from '@codemirror/state'
 import {EditorView, keymap} from '@codemirror/view'
 import {defaultKeymap} from '@codemirror/commands'
 import {rust} from '@codemirror/lang-rust'
-import {oneDark} from '@codemirror/theme-one-dark'
+import CodeMirror from '@uiw/react-codemirror';
 import {lineNumbers} from '@codemirror/view'
-import {syntaxHighlighting, defaultHighlightStyle} from '@codemirror/language'
+import { bespin } from '@uiw/codemirror-themes-all';
 
 interface CodeMirrorProps {
   initialDoc?: string,
-  onChange?: (state: EditorState) => void
+  plainText: boolean,
+  width: number
 }
 
 const CodeMirrorEditor = ({
-                            initialDoc = "", onChange = () => {
-  }
+                            initialDoc = "", plainText = false, width = 600
                           }: CodeMirrorProps) => {
-  const editor = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!editor.current) return
-
-    const state = EditorState.create({
-      doc: initialDoc,
-      extensions: [
-        keymap.of(defaultKeymap),
-        rust(),
-        oneDark,
-        lineNumbers(),
-        syntaxHighlighting(defaultHighlightStyle),
-        EditorView.editable.of(false),
-        EditorState.readOnly.of(true),
-        EditorState.tabSize.of(4),
-        EditorView.updateListener.of((update) => {
-          if (update.changes) {
-            onChange(update.state)
-          }
-        })
-      ]
-    })
-
-    const view = new EditorView({
-      state,
-      parent: editor.current
-    })
-
-    return () => {
-      view.destroy()
-    }
-  }, [editor.current])
-
-  return <div ref={editor} style={{
-    height: 'auto',
-    width: '500px',
-    overflow: 'auto',
-    border: '1px solid #333',
-    textAlign: 'left'
-  }}/>
+  return <CodeMirror value={initialDoc.replace(/\n+$/, '').replace(/^\n+/, '').trim()}
+                     style={{
+                       height: 'auto',
+                       width: `${width}px`,
+                       overflow: 'auto',
+                       border: '1px solid #333',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       textAlign: 'left',
+                     }}
+                     theme={bespin}
+                     extensions={
+                       [
+                         keymap.of(defaultKeymap),
+                         lineNumbers(),
+                         EditorView.editable.of(false),
+                         EditorState.readOnly.of(true),
+                       ].concat(plainText ? [] : [rust()])
+                     }/>
 }
-
 export default CodeMirrorEditor

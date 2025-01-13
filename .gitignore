@@ -1,3 +1,6 @@
 /target
 *.pb.bin
 *.o
+node_modules
+rust_out
+.DS_Store

@@ -294,8 +294,20 @@ pub struct Exercise {
     // message fields
     // @@protoc_insertion_point(field:rust.exercises.Exercise.formatted_program)
     pub formatted_program: ::std::string::String,
+    /// *
+    /// Available variable names in the program. Used for creating
+    /// distractors
+    // @@protoc_insertion_point(field:rust.exercises.Exercise.variable_names)
+    pub variable_names: ::std::vec::Vec<::std::string::String>,
     // @@protoc_insertion_point(field:rust.exercises.Exercise.errors)
     pub errors: ::std::vec::Vec<ErrorMessage>,
+    // @@protoc_insertion_point(field:rust.exercises.Exercise.human_errors)
+    pub human_errors: ::std::vec::Vec<::std::string::String>,
+    /// *
+    /// How many primitive units are in this program. Used for
+    /// starting with simpler programs
+    // @@protoc_insertion_point(field:rust.exercises.Exercise.program_length)
+    pub program_length: i32,
     // special fields
     // @@protoc_insertion_point(special_field:rust.exercises.Exercise.special_fields)
     pub special_fields: ::protobuf::SpecialFields,
@@ -313,7 +325,7 @@ impl Exercise {
     }
 
     fn generated_message_descriptor_data() -> ::protobuf::reflect::GeneratedMessageDescriptorData {
-        let mut fields = ::std::vec::Vec::with_capacity(2);
+        let mut fields = ::std::vec::Vec::with_capacity(5);
         let mut oneofs = ::std::vec::Vec::with_capacity(0);
         fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
             "formatted_program",
@@ -321,9 +333,24 @@ impl Exercise {
             |m: &mut Exercise| { &mut m.formatted_program },
         ));
         fields.push(::protobuf::reflect::rt::v2::make_vec_simpler_accessor::<_, _>(
+            "variable_names",
+            |m: &Exercise| { &m.variable_names },
+            |m: &mut Exercise| { &mut m.variable_names },
+        ));
+        fields.push(::protobuf::reflect::rt::v2::make_vec_simpler_accessor::<_, _>(
             "errors",
             |m: &Exercise| { &m.errors },
             |m: &mut Exercise| { &mut m.errors },
+        ));
+        fields.push(::protobuf::reflect::rt::v2::make_vec_simpler_accessor::<_, _>(
+            "human_errors",
+            |m: &Exercise| { &m.human_errors },
+            |m: &mut Exercise| { &mut m.human_errors },
+        ));
+        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
+            "program_length",
+            |m: &Exercise| { &m.program_length },
+            |m: &mut Exercise| { &mut m.program_length },
         ));
         ::protobuf::reflect::GeneratedMessageDescriptorData::new_2::<Exercise>(
             "Exercise",
@@ -347,7 +374,16 @@ impl ::protobuf::Message for Exercise {
                     self.formatted_program = is.read_string()?;
                 },
                 18 => {
+                    self.variable_names.push(is.read_string()?);
+                },
+                26 => {
                     self.errors.push(is.read_message()?);
+                },
+                34 => {
+                    self.human_errors.push(is.read_string()?);
+                },
+                40 => {
+                    self.program_length = is.read_int32()?;
                 },
                 tag => {
                     ::protobuf::rt::read_unknown_or_skip_group(tag, is, self.special_fields.mut_unknown_fields())?;
@@ -364,10 +400,19 @@ impl ::protobuf::Message for Exercise {
         if !self.formatted_program.is_empty() {
             my_size += ::protobuf::rt::string_size(1, &self.formatted_program);
         }
+        for value in &self.variable_names {
+            my_size += ::protobuf::rt::string_size(2, &value);
+        };
         for value in &self.errors {
             let len = value.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint64_size(len) + len;
         };
+        for value in &self.human_errors {
+            my_size += ::protobuf::rt::string_size(4, &value);
+        };
+        if self.program_length != 0 {
+            my_size += ::protobuf::rt::int32_size(5, self.program_length);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.special_fields.unknown_fields());
         self.special_fields.cached_size().set(my_size as u32);
         my_size
@@ -377,9 +422,18 @@ impl ::protobuf::Message for Exercise {
         if !self.formatted_program.is_empty() {
             os.write_string(1, &self.formatted_program)?;
         }
-        for v in &self.errors {
-            ::protobuf::rt::write_message_field_with_cached_size(2, v, os)?;
+        for v in &self.variable_names {
+            os.write_string(2, &v)?;
         };
+        for v in &self.errors {
+            ::protobuf::rt::write_message_field_with_cached_size(3, v, os)?;
+        };
+        for v in &self.human_errors {
+            os.write_string(4, &v)?;
+        };
+        if self.program_length != 0 {
+            os.write_int32(5, self.program_length)?;
+        }
         os.write_unknown_fields(self.special_fields.unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -398,14 +452,20 @@ impl ::protobuf::Message for Exercise {
 
     fn clear(&mut self) {
         self.formatted_program.clear();
+        self.variable_names.clear();
         self.errors.clear();
+        self.human_errors.clear();
+        self.program_length = 0;
         self.special_fields.clear();
     }
 
     fn default_instance() -> &'static Exercise {
         static instance: Exercise = Exercise {
             formatted_program: ::std::string::String::new(),
+            variable_names: ::std::vec::Vec::new(),
             errors: ::std::vec::Vec::new(),
+            human_errors: ::std::vec::Vec::new(),
+            program_length: 0,
             special_fields: ::protobuf::SpecialFields::new(),
         };
         &instance
@@ -435,10 +495,10 @@ pub struct ErrorMessage {
     // message fields
     // @@protoc_insertion_point(field:rust.exercises.ErrorMessage.message)
     pub message: ::std::string::String,
+    // @@protoc_insertion_point(field:rust.exercises.ErrorMessage.implicated_variable_names)
+    pub implicated_variable_names: ::std::vec::Vec<::std::string::String>,
     // @@protoc_insertion_point(field:rust.exercises.ErrorMessage.code)
     pub code: ::protobuf::MessageField<ErrorMessageCode>,
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessage.spans)
-    pub spans: ::std::vec::Vec<ErrorMessageSpan>,
     // special fields
     // @@protoc_insertion_point(special_field:rust.exercises.ErrorMessage.special_fields)
     pub special_fields: ::protobuf::SpecialFields,
@@ -463,15 +523,15 @@ impl ErrorMessage {
             |m: &ErrorMessage| { &m.message },
             |m: &mut ErrorMessage| { &mut m.message },
         ));
+        fields.push(::protobuf::reflect::rt::v2::make_vec_simpler_accessor::<_, _>(
+            "implicated_variable_names",
+            |m: &ErrorMessage| { &m.implicated_variable_names },
+            |m: &mut ErrorMessage| { &mut m.implicated_variable_names },
+        ));
         fields.push(::protobuf::reflect::rt::v2::make_message_field_accessor::<_, ErrorMessageCode>(
             "code",
             |m: &ErrorMessage| { &m.code },
             |m: &mut ErrorMessage| { &mut m.code },
-        ));
-        fields.push(::protobuf::reflect::rt::v2::make_vec_simpler_accessor::<_, _>(
-            "spans",
-            |m: &ErrorMessage| { &m.spans },
-            |m: &mut ErrorMessage| { &mut m.spans },
         ));
         ::protobuf::reflect::GeneratedMessageDescriptorData::new_2::<ErrorMessage>(
             "ErrorMessage",
@@ -495,10 +555,10 @@ impl ::protobuf::Message for ErrorMessage {
                     self.message = is.read_string()?;
                 },
                 18 => {
-                    ::protobuf::rt::read_singular_message_into_field(is, &mut self.code)?;
+                    self.implicated_variable_names.push(is.read_string()?);
                 },
                 26 => {
-                    self.spans.push(is.read_message()?);
+                    ::protobuf::rt::read_singular_message_into_field(is, &mut self.code)?;
                 },
                 tag => {
                     ::protobuf::rt::read_unknown_or_skip_group(tag, is, self.special_fields.mut_unknown_fields())?;
@@ -515,14 +575,13 @@ impl ::protobuf::Message for ErrorMessage {
         if !self.message.is_empty() {
             my_size += ::protobuf::rt::string_size(1, &self.message);
         }
+        for value in &self.implicated_variable_names {
+            my_size += ::protobuf::rt::string_size(2, &value);
+        };
         if let Some(v) = self.code.as_ref() {
             let len = v.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint64_size(len) + len;
         }
-        for value in &self.spans {
-            let len = value.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint64_size(len) + len;
-        };
         my_size += ::protobuf::rt::unknown_fields_size(self.special_fields.unknown_fields());
         self.special_fields.cached_size().set(my_size as u32);
         my_size
@@ -532,12 +591,12 @@ impl ::protobuf::Message for ErrorMessage {
         if !self.message.is_empty() {
             os.write_string(1, &self.message)?;
         }
-        if let Some(v) = self.code.as_ref() {
-            ::protobuf::rt::write_message_field_with_cached_size(2, v, os)?;
-        }
-        for v in &self.spans {
-            ::protobuf::rt::write_message_field_with_cached_size(3, v, os)?;
+        for v in &self.implicated_variable_names {
+            os.write_string(2, &v)?;
         };
+        if let Some(v) = self.code.as_ref() {
+            ::protobuf::rt::write_message_field_with_cached_size(3, v, os)?;
+        }
         os.write_unknown_fields(self.special_fields.unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -556,16 +615,16 @@ impl ::protobuf::Message for ErrorMessage {
 
     fn clear(&mut self) {
         self.message.clear();
+        self.implicated_variable_names.clear();
         self.code.clear();
-        self.spans.clear();
         self.special_fields.clear();
     }
 
     fn default_instance() -> &'static ErrorMessage {
         static instance: ErrorMessage = ErrorMessage {
             message: ::std::string::String::new(),
+            implicated_variable_names: ::std::vec::Vec::new(),
             code: ::protobuf::MessageField::none(),
-            spans: ::std::vec::Vec::new(),
             special_fields: ::protobuf::SpecialFields::new(),
         };
         &instance
@@ -595,8 +654,6 @@ pub struct ErrorMessageCode {
     // message fields
     // @@protoc_insertion_point(field:rust.exercises.ErrorMessageCode.code)
     pub code: ::std::string::String,
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessageCode.explanation)
-    pub explanation: ::std::string::String,
     // special fields
     // @@protoc_insertion_point(special_field:rust.exercises.ErrorMessageCode.special_fields)
     pub special_fields: ::protobuf::SpecialFields,
@@ -614,17 +671,12 @@ impl ErrorMessageCode {
     }
 
     fn generated_message_descriptor_data() -> ::protobuf::reflect::GeneratedMessageDescriptorData {
-        let mut fields = ::std::vec::Vec::with_capacity(2);
+        let mut fields = ::std::vec::Vec::with_capacity(1);
         let mut oneofs = ::std::vec::Vec::with_capacity(0);
         fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
             "code",
             |m: &ErrorMessageCode| { &m.code },
             |m: &mut ErrorMessageCode| { &mut m.code },
-        ));
-        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
-            "explanation",
-            |m: &ErrorMessageCode| { &m.explanation },
-            |m: &mut ErrorMessageCode| { &mut m.explanation },
         ));
         ::protobuf::reflect::GeneratedMessageDescriptorData::new_2::<ErrorMessageCode>(
             "ErrorMessageCode",
@@ -647,9 +699,6 @@ impl ::protobuf::Message for ErrorMessageCode {
                 10 => {
                     self.code = is.read_string()?;
                 },
-                18 => {
-                    self.explanation = is.read_string()?;
-                },
                 tag => {
                     ::protobuf::rt::read_unknown_or_skip_group(tag, is, self.special_fields.mut_unknown_fields())?;
                 },
@@ -665,9 +714,6 @@ impl ::protobuf::Message for ErrorMessageCode {
         if !self.code.is_empty() {
             my_size += ::protobuf::rt::string_size(1, &self.code);
         }
-        if !self.explanation.is_empty() {
-            my_size += ::protobuf::rt::string_size(2, &self.explanation);
-        }
         my_size += ::protobuf::rt::unknown_fields_size(self.special_fields.unknown_fields());
         self.special_fields.cached_size().set(my_size as u32);
         my_size
@@ -676,9 +722,6 @@ impl ::protobuf::Message for ErrorMessageCode {
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::Result<()> {
         if !self.code.is_empty() {
             os.write_string(1, &self.code)?;
-        }
-        if !self.explanation.is_empty() {
-            os.write_string(2, &self.explanation)?;
         }
         os.write_unknown_fields(self.special_fields.unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -698,14 +741,12 @@ impl ::protobuf::Message for ErrorMessageCode {
 
     fn clear(&mut self) {
         self.code.clear();
-        self.explanation.clear();
         self.special_fields.clear();
     }
 
     fn default_instance() -> &'static ErrorMessageCode {
         static instance: ErrorMessageCode = ErrorMessageCode {
             code: ::std::string::String::new(),
-            explanation: ::std::string::String::new(),
             special_fields: ::protobuf::SpecialFields::new(),
         };
         &instance
@@ -729,249 +770,70 @@ impl ::protobuf::reflect::ProtobufValue for ErrorMessageCode {
     type RuntimeType = ::protobuf::reflect::rt::RuntimeTypeMessage<Self>;
 }
 
-// @@protoc_insertion_point(message:rust.exercises.ErrorMessageSpan)
-#[derive(PartialEq,Clone,Default,Debug)]
-pub struct ErrorMessageSpan {
-    // message fields
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessageSpan.line_start)
-    pub line_start: u32,
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessageSpan.line_end)
-    pub line_end: u32,
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessageSpan.column_start)
-    pub column_start: u32,
-    // @@protoc_insertion_point(field:rust.exercises.ErrorMessageSpan.column_end)
-    pub column_end: u32,
-    // special fields
-    // @@protoc_insertion_point(special_field:rust.exercises.ErrorMessageSpan.special_fields)
-    pub special_fields: ::protobuf::SpecialFields,
-}
-
-impl<'a> ::std::default::Default for &'a ErrorMessageSpan {
-    fn default() -> &'a ErrorMessageSpan {
-        <ErrorMessageSpan as ::protobuf::Message>::default_instance()
-    }
-}
-
-impl ErrorMessageSpan {
-    pub fn new() -> ErrorMessageSpan {
-        ::std::default::Default::default()
-    }
-
-    fn generated_message_descriptor_data() -> ::protobuf::reflect::GeneratedMessageDescriptorData {
-        let mut fields = ::std::vec::Vec::with_capacity(4);
-        let mut oneofs = ::std::vec::Vec::with_capacity(0);
-        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
-            "line_start",
-            |m: &ErrorMessageSpan| { &m.line_start },
-            |m: &mut ErrorMessageSpan| { &mut m.line_start },
-        ));
-        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
-            "line_end",
-            |m: &ErrorMessageSpan| { &m.line_end },
-            |m: &mut ErrorMessageSpan| { &mut m.line_end },
-        ));
-        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
-            "column_start",
-            |m: &ErrorMessageSpan| { &m.column_start },
-            |m: &mut ErrorMessageSpan| { &mut m.column_start },
-        ));
-        fields.push(::protobuf::reflect::rt::v2::make_simpler_field_accessor::<_, _>(
-            "column_end",
-            |m: &ErrorMessageSpan| { &m.column_end },
-            |m: &mut ErrorMessageSpan| { &mut m.column_end },
-        ));
-        ::protobuf::reflect::GeneratedMessageDescriptorData::new_2::<ErrorMessageSpan>(
-            "ErrorMessageSpan",
-            fields,
-            oneofs,
-        )
-    }
-}
-
-impl ::protobuf::Message for ErrorMessageSpan {
-    const NAME: &'static str = "ErrorMessageSpan";
-
-    fn is_initialized(&self) -> bool {
-        true
-    }
-
-    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::Result<()> {
-        while let Some(tag) = is.read_raw_tag_or_eof()? {
-            match tag {
-                8 => {
-                    self.line_start = is.read_uint32()?;
-                },
-                16 => {
-                    self.line_end = is.read_uint32()?;
-                },
-                24 => {
-                    self.column_start = is.read_uint32()?;
-                },
-                32 => {
-                    self.column_end = is.read_uint32()?;
-                },
-                tag => {
-                    ::protobuf::rt::read_unknown_or_skip_group(tag, is, self.special_fields.mut_unknown_fields())?;
-                },
-            };
-        }
-        ::std::result::Result::Ok(())
-    }
-
-    // Compute sizes of nested messages
-    #[allow(unused_variables)]
-    fn compute_size(&self) -> u64 {
-        let mut my_size = 0;
-        if self.line_start != 0 {
-            my_size += ::protobuf::rt::uint32_size(1, self.line_start);
-        }
-        if self.line_end != 0 {
-            my_size += ::protobuf::rt::uint32_size(2, self.line_end);
-        }
-        if self.column_start != 0 {
-            my_size += ::protobuf::rt::uint32_size(3, self.column_start);
-        }
-        if self.column_end != 0 {
-            my_size += ::protobuf::rt::uint32_size(4, self.column_end);
-        }
-        my_size += ::protobuf::rt::unknown_fields_size(self.special_fields.unknown_fields());
-        self.special_fields.cached_size().set(my_size as u32);
-        my_size
-    }
-
-    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::Result<()> {
-        if self.line_start != 0 {
-            os.write_uint32(1, self.line_start)?;
-        }
-        if self.line_end != 0 {
-            os.write_uint32(2, self.line_end)?;
-        }
-        if self.column_start != 0 {
-            os.write_uint32(3, self.column_start)?;
-        }
-        if self.column_end != 0 {
-            os.write_uint32(4, self.column_end)?;
-        }
-        os.write_unknown_fields(self.special_fields.unknown_fields())?;
-        ::std::result::Result::Ok(())
-    }
-
-    fn special_fields(&self) -> &::protobuf::SpecialFields {
-        &self.special_fields
-    }
-
-    fn mut_special_fields(&mut self) -> &mut ::protobuf::SpecialFields {
-        &mut self.special_fields
-    }
-
-    fn new() -> ErrorMessageSpan {
-        ErrorMessageSpan::new()
-    }
-
-    fn clear(&mut self) {
-        self.line_start = 0;
-        self.line_end = 0;
-        self.column_start = 0;
-        self.column_end = 0;
-        self.special_fields.clear();
-    }
-
-    fn default_instance() -> &'static ErrorMessageSpan {
-        static instance: ErrorMessageSpan = ErrorMessageSpan {
-            line_start: 0,
-            line_end: 0,
-            column_start: 0,
-            column_end: 0,
-            special_fields: ::protobuf::SpecialFields::new(),
-        };
-        &instance
-    }
-}
-
-impl ::protobuf::MessageFull for ErrorMessageSpan {
-    fn descriptor() -> ::protobuf::reflect::MessageDescriptor {
-        static descriptor: ::protobuf::rt::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::Lazy::new();
-        descriptor.get(|| file_descriptor().message_by_package_relative_name("ErrorMessageSpan").unwrap()).clone()
-    }
-}
-
-impl ::std::fmt::Display for ErrorMessageSpan {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        ::protobuf::text_format::fmt(self, f)
-    }
-}
-
-impl ::protobuf::reflect::ProtobufValue for ErrorMessageSpan {
-    type RuntimeType = ::protobuf::reflect::rt::RuntimeTypeMessage<Self>;
-}
-
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x1asrc/protos/exercises.proto\x12\x0erust.exercises\"X\n\tExercises\
     \x12K\n\x0fexercise_groups\x18\x01\x20\x03(\x0b2\".rust.exercises.ErrorE\
     xerciseGroupR\x0eexerciseGroups\"m\n\x12ErrorExerciseGroup\x12\x1f\n\x0b\
     error_codes\x18\x01\x20\x03(\tR\nerrorCodes\x126\n\texercises\x18\x02\
-    \x20\x03(\x0b2\x18.rust.exercises.ExerciseR\texercises\"m\n\x08Exercise\
-    \x12+\n\x11formatted_program\x18\x01\x20\x01(\tR\x10formattedProgram\x12\
-    4\n\x06errors\x18\x02\x20\x03(\x0b2\x1c.rust.exercises.ErrorMessageR\x06\
-    errors\"\x96\x01\n\x0cErrorMessage\x12\x18\n\x07message\x18\x01\x20\x01(\
-    \tR\x07message\x124\n\x04code\x18\x02\x20\x01(\x0b2\x20.rust.exercises.E\
-    rrorMessageCodeR\x04code\x126\n\x05spans\x18\x03\x20\x03(\x0b2\x20.rust.\
-    exercises.ErrorMessageSpanR\x05spans\"H\n\x10ErrorMessageCode\x12\x12\n\
-    \x04code\x18\x01\x20\x01(\tR\x04code\x12\x20\n\x0bexplanation\x18\x02\
-    \x20\x01(\tR\x0bexplanation\"\x8e\x01\n\x10ErrorMessageSpan\x12\x1d\n\nl\
-    ine_start\x18\x01\x20\x01(\rR\tlineStart\x12\x19\n\x08line_end\x18\x02\
-    \x20\x01(\rR\x07lineEnd\x12!\n\x0ccolumn_start\x18\x03\x20\x01(\rR\x0bco\
-    lumnStart\x12\x1d\n\ncolumn_end\x18\x04\x20\x01(\rR\tcolumnEndJ\xf4\x07\
-    \n\x06\x12\x04\0\0\"\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\
-    \x12\x03\x02\0\x17\n\n\n\x02\x04\0\x12\x04\x04\0\x06\x01\n\n\n\x03\x04\0\
-    \x01\x12\x03\x04\x08\x11\n\x0b\n\x04\x04\0\x02\0\x12\x03\x05\x022\n\x0c\
-    \n\x05\x04\0\x02\0\x04\x12\x03\x05\x02\n\n\x0c\n\x05\x04\0\x02\0\x06\x12\
-    \x03\x05\x0b\x1d\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\x05\x1e-\n\x0c\n\
-    \x05\x04\0\x02\0\x03\x12\x03\x0501\n\n\n\x02\x04\x01\x12\x04\x08\0\x0b\
-    \x01\n\n\n\x03\x04\x01\x01\x12\x03\x08\x08\x1a\n\x0b\n\x04\x04\x01\x02\0\
-    \x12\x03\t\x02\"\n\x0c\n\x05\x04\x01\x02\0\x04\x12\x03\t\x02\n\n\x0c\n\
-    \x05\x04\x01\x02\0\x05\x12\x03\t\x0b\x11\n\x0c\n\x05\x04\x01\x02\0\x01\
-    \x12\x03\t\x12\x1d\n\x0c\n\x05\x04\x01\x02\0\x03\x12\x03\t\x20!\n\x0b\n\
-    \x04\x04\x01\x02\x01\x12\x03\n\x02\"\n\x0c\n\x05\x04\x01\x02\x01\x04\x12\
-    \x03\n\x02\n\n\x0c\n\x05\x04\x01\x02\x01\x06\x12\x03\n\x0b\x13\n\x0c\n\
-    \x05\x04\x01\x02\x01\x01\x12\x03\n\x14\x1d\n\x0c\n\x05\x04\x01\x02\x01\
-    \x03\x12\x03\n\x20!\n\n\n\x02\x04\x02\x12\x04\r\0\x10\x01\n\n\n\x03\x04\
-    \x02\x01\x12\x03\r\x08\x10\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0e\x02\x1f\
-    \n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\x0e\x02\x08\n\x0c\n\x05\x04\x02\
-    \x02\0\x01\x12\x03\x0e\t\x1a\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x0e\
-    \x1d\x1e\n\x0b\n\x04\x04\x02\x02\x01\x12\x03\x0f\x02#\n\x0c\n\x05\x04\
-    \x02\x02\x01\x04\x12\x03\x0f\x02\n\n\x0c\n\x05\x04\x02\x02\x01\x06\x12\
-    \x03\x0f\x0b\x17\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x0f\x18\x1e\n\
-    \x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x0f!\"\n\n\n\x02\x04\x03\x12\x04\
-    \x12\0\x16\x01\n\n\n\x03\x04\x03\x01\x12\x03\x12\x08\x14\n\x0b\n\x04\x04\
-    \x03\x02\0\x12\x03\x13\x02\x15\n\x0c\n\x05\x04\x03\x02\0\x05\x12\x03\x13\
-    \x02\x08\n\x0c\n\x05\x04\x03\x02\0\x01\x12\x03\x13\t\x10\n\x0c\n\x05\x04\
-    \x03\x02\0\x03\x12\x03\x13\x13\x14\n\x0b\n\x04\x04\x03\x02\x01\x12\x03\
-    \x14\x02\x1c\n\x0c\n\x05\x04\x03\x02\x01\x06\x12\x03\x14\x02\x12\n\x0c\n\
-    \x05\x04\x03\x02\x01\x01\x12\x03\x14\x13\x17\n\x0c\n\x05\x04\x03\x02\x01\
-    \x03\x12\x03\x14\x1a\x1b\n\x0b\n\x04\x04\x03\x02\x02\x12\x03\x15\x02&\n\
-    \x0c\n\x05\x04\x03\x02\x02\x04\x12\x03\x15\x02\n\n\x0c\n\x05\x04\x03\x02\
-    \x02\x06\x12\x03\x15\x0b\x1b\n\x0c\n\x05\x04\x03\x02\x02\x01\x12\x03\x15\
-    \x1c!\n\x0c\n\x05\x04\x03\x02\x02\x03\x12\x03\x15$%\n\n\n\x02\x04\x04\
-    \x12\x04\x18\0\x1b\x01\n\n\n\x03\x04\x04\x01\x12\x03\x18\x08\x18\n\x0b\n\
-    \x04\x04\x04\x02\0\x12\x03\x19\x02\x12\n\x0c\n\x05\x04\x04\x02\0\x05\x12\
-    \x03\x19\x02\x08\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03\x19\t\r\n\x0c\n\
-    \x05\x04\x04\x02\0\x03\x12\x03\x19\x10\x11\n\x0b\n\x04\x04\x04\x02\x01\
-    \x12\x03\x1a\x02\x19\n\x0c\n\x05\x04\x04\x02\x01\x05\x12\x03\x1a\x02\x08\
-    \n\x0c\n\x05\x04\x04\x02\x01\x01\x12\x03\x1a\t\x14\n\x0c\n\x05\x04\x04\
-    \x02\x01\x03\x12\x03\x1a\x17\x18\n\n\n\x02\x04\x05\x12\x04\x1d\0\"\x01\n\
-    \n\n\x03\x04\x05\x01\x12\x03\x1d\x08\x18\n\x0b\n\x04\x04\x05\x02\0\x12\
-    \x03\x1e\x02\x18\n\x0c\n\x05\x04\x05\x02\0\x05\x12\x03\x1e\x02\x08\n\x0c\
-    \n\x05\x04\x05\x02\0\x01\x12\x03\x1e\t\x13\n\x0c\n\x05\x04\x05\x02\0\x03\
-    \x12\x03\x1e\x16\x17\n\x0b\n\x04\x04\x05\x02\x01\x12\x03\x1f\x02\x16\n\
-    \x0c\n\x05\x04\x05\x02\x01\x05\x12\x03\x1f\x02\x08\n\x0c\n\x05\x04\x05\
-    \x02\x01\x01\x12\x03\x1f\t\x11\n\x0c\n\x05\x04\x05\x02\x01\x03\x12\x03\
-    \x1f\x14\x15\n\x0b\n\x04\x04\x05\x02\x02\x12\x03\x20\x02\x1a\n\x0c\n\x05\
-    \x04\x05\x02\x02\x05\x12\x03\x20\x02\x08\n\x0c\n\x05\x04\x05\x02\x02\x01\
-    \x12\x03\x20\t\x15\n\x0c\n\x05\x04\x05\x02\x02\x03\x12\x03\x20\x18\x19\n\
-    \x0b\n\x04\x04\x05\x02\x03\x12\x03!\x02\x18\n\x0c\n\x05\x04\x05\x02\x03\
-    \x05\x12\x03!\x02\x08\n\x0c\n\x05\x04\x05\x02\x03\x01\x12\x03!\t\x13\n\
-    \x0c\n\x05\x04\x05\x02\x03\x03\x12\x03!\x16\x17b\x06proto3\
+    \x20\x03(\x0b2\x18.rust.exercises.ExerciseR\texercises\"\xde\x01\n\x08Ex\
+    ercise\x12+\n\x11formatted_program\x18\x01\x20\x01(\tR\x10formattedProgr\
+    am\x12%\n\x0evariable_names\x18\x02\x20\x03(\tR\rvariableNames\x124\n\
+    \x06errors\x18\x03\x20\x03(\x0b2\x1c.rust.exercises.ErrorMessageR\x06err\
+    ors\x12!\n\x0chuman_errors\x18\x04\x20\x03(\tR\x0bhumanErrors\x12%\n\x0e\
+    program_length\x18\x05\x20\x01(\x05R\rprogramLength\"\x9a\x01\n\x0cError\
+    Message\x12\x18\n\x07message\x18\x01\x20\x01(\tR\x07message\x12:\n\x19im\
+    plicated_variable_names\x18\x02\x20\x03(\tR\x17implicatedVariableNames\
+    \x124\n\x04code\x18\x03\x20\x01(\x0b2\x20.rust.exercises.ErrorMessageCod\
+    eR\x04code\"&\n\x10ErrorMessageCode\x12\x12\n\x04code\x18\x01\x20\x01(\t\
+    R\x04codeJ\xe2\x08\n\x06\x12\x04\0\0&\x01\n\x08\n\x01\x0c\x12\x03\0\0\
+    \x12\n\x08\n\x01\x02\x12\x03\x02\0\x17\n\n\n\x02\x04\0\x12\x04\x04\0\x07\
+    \x01\n\n\n\x03\x04\0\x01\x12\x03\x04\x08\x11\n>\n\x04\x04\0\x02\0\x12\
+    \x03\x05\x022\"1\x20Rust\x20explanation\x20map??\x20but\x20we'd\x20need\
+    \x20formatting\n\n\x0c\n\x05\x04\0\x02\0\x04\x12\x03\x05\x02\n\n\x0c\n\
+    \x05\x04\0\x02\0\x06\x12\x03\x05\x0b\x1d\n\x0c\n\x05\x04\0\x02\0\x01\x12\
+    \x03\x05\x1e-\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\x0501\n\n\n\x02\x04\
+    \x01\x12\x04\t\0\x0c\x01\n\n\n\x03\x04\x01\x01\x12\x03\t\x08\x1a\n\x0b\n\
+    \x04\x04\x01\x02\0\x12\x03\n\x02\"\n\x0c\n\x05\x04\x01\x02\0\x04\x12\x03\
+    \n\x02\n\n\x0c\n\x05\x04\x01\x02\0\x05\x12\x03\n\x0b\x11\n\x0c\n\x05\x04\
+    \x01\x02\0\x01\x12\x03\n\x12\x1d\n\x0c\n\x05\x04\x01\x02\0\x03\x12\x03\n\
+    \x20!\n\x0b\n\x04\x04\x01\x02\x01\x12\x03\x0b\x02\"\n\x0c\n\x05\x04\x01\
+    \x02\x01\x04\x12\x03\x0b\x02\n\n\x0c\n\x05\x04\x01\x02\x01\x06\x12\x03\
+    \x0b\x0b\x13\n\x0c\n\x05\x04\x01\x02\x01\x01\x12\x03\x0b\x14\x1d\n\x0c\n\
+    \x05\x04\x01\x02\x01\x03\x12\x03\x0b\x20!\n\n\n\x02\x04\x02\x12\x04\x0e\
+    \0\x1c\x01\n\n\n\x03\x04\x02\x01\x12\x03\x0e\x08\x10\n\x0b\n\x04\x04\x02\
+    \x02\0\x12\x03\x0f\x02\x1f\n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\x0f\x02\
+    \x08\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\x0f\t\x1a\n\x0c\n\x05\x04\x02\
+    \x02\0\x03\x12\x03\x0f\x1d\x1e\nV\n\x04\x04\x02\x02\x01\x12\x03\x14\x02%\
+    \x1aI*\nAvailable\x20variable\x20names\x20in\x20the\x20program.\x20Used\
+    \x20for\x20creating\ndistractors\n\n\x0c\n\x05\x04\x02\x02\x01\x04\x12\
+    \x03\x14\x02\n\n\x0c\n\x05\x04\x02\x02\x01\x05\x12\x03\x14\x0b\x11\n\x0c\
+    \n\x05\x04\x02\x02\x01\x01\x12\x03\x14\x12\x20\n\x0c\n\x05\x04\x02\x02\
+    \x01\x03\x12\x03\x14#$\n\x0b\n\x04\x04\x02\x02\x02\x12\x03\x15\x02#\n\
+    \x0c\n\x05\x04\x02\x02\x02\x04\x12\x03\x15\x02\n\n\x0c\n\x05\x04\x02\x02\
+    \x02\x06\x12\x03\x15\x0b\x17\n\x0c\n\x05\x04\x02\x02\x02\x01\x12\x03\x15\
+    \x18\x1e\n\x0c\n\x05\x04\x02\x02\x02\x03\x12\x03\x15!\"\n\x0b\n\x04\x04\
+    \x02\x02\x03\x12\x03\x16\x02#\n\x0c\n\x05\x04\x02\x02\x03\x04\x12\x03\
+    \x16\x02\n\n\x0c\n\x05\x04\x02\x02\x03\x05\x12\x03\x16\x0b\x11\n\x0c\n\
+    \x05\x04\x02\x02\x03\x01\x12\x03\x16\x12\x1e\n\x0c\n\x05\x04\x02\x02\x03\
+    \x03\x12\x03\x16!\"\ne\n\x04\x04\x02\x02\x04\x12\x03\x1b\x02\x1b\x1aX*\n\
+    How\x20many\x20primitive\x20units\x20are\x20in\x20this\x20program.\x20Us\
+    ed\x20for\nstarting\x20with\x20simpler\x20programs\n\n\x0c\n\x05\x04\x02\
+    \x02\x04\x05\x12\x03\x1b\x02\x07\n\x0c\n\x05\x04\x02\x02\x04\x01\x12\x03\
+    \x1b\x08\x16\n\x0c\n\x05\x04\x02\x02\x04\x03\x12\x03\x1b\x19\x1a\n\n\n\
+    \x02\x04\x03\x12\x04\x1e\0\"\x01\n\n\n\x03\x04\x03\x01\x12\x03\x1e\x08\
+    \x14\n\x0b\n\x04\x04\x03\x02\0\x12\x03\x1f\x02\x15\n\x0c\n\x05\x04\x03\
+    \x02\0\x05\x12\x03\x1f\x02\x08\n\x0c\n\x05\x04\x03\x02\0\x01\x12\x03\x1f\
+    \t\x10\n\x0c\n\x05\x04\x03\x02\0\x03\x12\x03\x1f\x13\x14\n\x0b\n\x04\x04\
+    \x03\x02\x01\x12\x03\x20\x020\n\x0c\n\x05\x04\x03\x02\x01\x04\x12\x03\
+    \x20\x02\n\n\x0c\n\x05\x04\x03\x02\x01\x05\x12\x03\x20\x0b\x11\n\x0c\n\
+    \x05\x04\x03\x02\x01\x01\x12\x03\x20\x12+\n\x0c\n\x05\x04\x03\x02\x01\
+    \x03\x12\x03\x20./\n\x0b\n\x04\x04\x03\x02\x02\x12\x03!\x02\x1c\n\x0c\n\
+    \x05\x04\x03\x02\x02\x06\x12\x03!\x02\x12\n\x0c\n\x05\x04\x03\x02\x02\
+    \x01\x12\x03!\x13\x17\n\x0c\n\x05\x04\x03\x02\x02\x03\x12\x03!\x1a\x1b\n\
+    \n\n\x02\x04\x04\x12\x04$\0&\x01\n\n\n\x03\x04\x04\x01\x12\x03$\x08\x18\
+    \n\x0b\n\x04\x04\x04\x02\0\x12\x03%\x02\x12\n\x0c\n\x05\x04\x04\x02\0\
+    \x05\x12\x03%\x02\x08\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03%\t\r\n\x0c\n\
+    \x05\x04\x04\x02\0\x03\x12\x03%\x10\x11b\x06proto3\
 ";
 
 /// `FileDescriptorProto` object which was a source for this generated file
@@ -989,13 +851,12 @@ pub fn file_descriptor() -> &'static ::protobuf::reflect::FileDescriptor {
     file_descriptor.get(|| {
         let generated_file_descriptor = generated_file_descriptor_lazy.get(|| {
             let mut deps = ::std::vec::Vec::with_capacity(0);
-            let mut messages = ::std::vec::Vec::with_capacity(6);
+            let mut messages = ::std::vec::Vec::with_capacity(5);
             messages.push(Exercises::generated_message_descriptor_data());
             messages.push(ErrorExerciseGroup::generated_message_descriptor_data());
             messages.push(Exercise::generated_message_descriptor_data());
             messages.push(ErrorMessage::generated_message_descriptor_data());
             messages.push(ErrorMessageCode::generated_message_descriptor_data());
-            messages.push(ErrorMessageSpan::generated_message_descriptor_data());
             let mut enums = ::std::vec::Vec::with_capacity(0);
             ::protobuf::reflect::GeneratedFileDescriptor::new_generated(
                 file_descriptor_proto(),

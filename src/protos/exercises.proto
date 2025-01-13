@@ -4,6 +4,7 @@ package rust.exercises;
 
 message Exercises {
   repeated ErrorExerciseGroup exercise_groups = 1;
+  // Rust explanation map?? but we'd need formatting
 }
 
 message ErrorExerciseGroup {
@@ -13,24 +14,27 @@ message ErrorExerciseGroup {
 
 message Exercise {
   string formatted_program = 1;
-  repeated ErrorMessage errors = 2;
+  /**
+    Available variable names in the program. Used for creating
+    distractors
+   */
+  repeated string variable_names = 2;
+  repeated ErrorMessage errors = 3;
+  repeated string human_errors = 4;
+  /**
+  How many primitive units are in this program. Used for
+  starting with simpler programs
+   */
+  int32 program_length = 5;
 }
 
 message ErrorMessage {
   string message = 1;
-  ErrorMessageCode code = 2;
-  repeated ErrorMessageSpan spans = 3;
+  repeated string implicated_variable_names = 2;
+  ErrorMessageCode code = 3;
 }
 
 message ErrorMessageCode {
   string code = 1;
-  string explanation = 2;
-}
-
-message ErrorMessageSpan {
-  uint32 line_start = 1;
-  uint32 line_end = 2;
-  uint32 column_start = 3;
-  uint32 column_end = 4;
 }
 

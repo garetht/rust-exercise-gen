@@ -4,8 +4,10 @@ use crate::variable::{
 use fake::faker::company::en::BuzzwordTail;
 use fake::Fake;
 use std::collections::{HashMap, HashSet};
+use rand::Rng;
+use rand::rngs::StdRng;
 
-pub fn render_program(outline: &Vec<OutlineStatement>) -> Vec<String> {
+pub fn render_program(outline: &Vec<OutlineStatement>, rng: &mut StdRng) -> Vec<String> {
     let mut definitions: Vec<String> = vec![];
     let mut program: Vec<String> = vec![];
 
@@ -26,12 +28,13 @@ pub fn render_program(outline: &Vec<OutlineStatement>) -> Vec<String> {
     for statement in outline {
         match statement {
             OutlineStatement::VariableDeclaration(declaration) => {
-                program.push(render_variable_declaration(declaration.clone()));
+                program.push(render_variable_declaration(declaration.clone(), rng));
             }
             OutlineStatement::FunctionCall(call) => {
                 program.push(render_function_call(
                     call.clone(),
                     &function_names_by_signatures,
+                    rng
                 ));
             }
             OutlineStatement::PrintVariables(variables) => program.push(render_print_variables(
@@ -111,6 +114,7 @@ fn render_function_definition(
 fn render_function_call(
     call: FunctionCall,
     function_names_by_signatures: &HashMap<Vec<TypeAnnotation>, String>,
+    rng: &mut StdRng
 ) -> String {
     let mut rendered_arguments = vec![];
     let call_argument_types: Vec<TypeAnnotation> =
@@ -119,7 +123,7 @@ fn render_function_call(
         .get(&call_argument_types)
         .unwrap();
     for argument in call.arguments {
-        rendered_arguments.push(render_expression(argument));
+        rendered_arguments.push(render_expression(argument, rng));
     }
 
     format!("{}({});", function_name, rendered_arguments.join(", "))
@@ -143,17 +147,17 @@ fn render_type_annotation(type_annotation: TypeAnnotation) -> String {
     }
 }
 
-fn render_expression(expression: Expression) -> String {
+fn render_expression(expression: Expression, rng: &mut StdRng) -> String {
     match expression {
         Expression::VectorLiteral { contents } => {
             let mut rendered_contents = vec![];
             for content in contents {
-                rendered_contents.push(render_expression(content));
+                rendered_contents.push(render_expression(content, rng));
             }
             format!("vec![{}]", rendered_contents.join(", "))
         }
         Expression::IntLiteral { .. } => {
-            format!("{}", 42)
+            format!("{}", rng.gen_range(1..100))
         }
         Expression::StringFromLiteral { .. } => {
             format! {r#"String::from("{}")"#, BuzzwordTail().fake::<String>().to_lowercase()}
@@ -168,14 +172,14 @@ fn render_expression(expression: Expression) -> String {
             format!(
                 "&{}{}",
                 if is_mutable { "mut " } else { "" },
-                render_expression(*expression)
+                render_expression(*expression, rng)
             )
         }
         Expression::Dereference { expression } => {
-            format!("*{}", render_expression(*expression))
+            format!("*{}", render_expression(*expression, rng))
         }
         Expression::IndexAccess { expression, index } => {
-            format!("{}[{}]", render_expression(*expression), index)
+            format!("{}[{}]", render_expression(*expression, rng), index)
         }
         Expression::SliceAccess {
             expression,
@@ -184,7 +188,7 @@ fn render_expression(expression: Expression) -> String {
         } => {
             format!(
                 "{}[{}..{}]",
-                render_expression(*expression),
+                render_expression(*expression, rng),
                 start_index
                     .map(|u| format!("{}", u))
                     .unwrap_or(String::from("")),
@@ -196,7 +200,7 @@ fn render_expression(expression: Expression) -> String {
     }
 }
 
-fn render_variable_declaration(variable_declaration: VariableDeclaration) -> String {
+fn render_variable_declaration(variable_declaration: VariableDeclaration, rng: &mut StdRng) -> String {
     format!(
         "let {}{} : {} = {};",
         if variable_declaration.left_info.is_mutable {
@@ -206,6 +210,6 @@ fn render_variable_declaration(variable_declaration: VariableDeclaration) -> Str
         },
         variable_declaration.left_info.name,
         render_type_annotation(variable_declaration.right_expression.expr_type()),
-        render_expression(variable_declaration.right_expression)
+        render_expression(variable_declaration.right_expression, rng)
     )
 }

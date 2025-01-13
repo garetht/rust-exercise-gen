@@ -1,30 +1,34 @@
+use crate::char_utils::extract_backtick_text;
 use crate::checker::{check_rust_code, CompilerMessage};
 use crate::formatter::format_rust_code;
 use crate::outline_generator::fill_outline;
 use crate::program_renderer::render_program;
 use crate::program_state::ExecutionSkeleton;
+use crate::protos::exercises::{
+    ErrorExerciseGroup, ErrorMessage, ErrorMessageCode, Exercise, Exercises,
+};
 use crate::skeleton_generator::fill_skeleton;
-use crate::variable::OutlineStatement;
+use crate::variable::{AvailableVariables, OutlineStatement};
+use protobuf::{Message as ProtobufMessage, MessageField, SpecialFields};
 use rand::prelude::{SliceRandom, StdRng};
 use rand::SeedableRng;
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
-use rayon::prelude::*;
-use protobuf::{Message as ProtobufMessage, MessageField, SpecialFields};
-use crate::protos::exercises::{ErrorExerciseGroup, ErrorMessage, ErrorMessageCode, ErrorMessageSpan, Exercise, Exercises};
 
 #[derive(Debug, Clone)]
 struct OutputProgram {
     compiler_messages: Vec<CompilerMessage>,
+    human_messages: Vec<String>,
     skeleton: Vec<ExecutionSkeleton>,
     outline: Vec<OutlineStatement>,
     formatted_program: String,
-    seed: u64
+    variable_names: Vec<String>,
+    seed: u64,
 }
 
-
-pub fn generate_and_write_programs() -> std::io::Result<()> {
+pub fn generate_and_write_programs_to_file() -> std::io::Result<()> {
     let mut programs_by_error = group_programs_by_error();
     let exercises = convert_to_protobuf(&mut programs_by_error);
 
@@ -33,13 +37,14 @@ pub fn generate_and_write_programs() -> std::io::Result<()> {
     file.write_all(&bytes)
 }
 
-fn convert_to_protobuf(programs_by_error: &mut HashMap<Vec<String>, Vec<OutputProgram>>) -> Exercises {
+fn convert_to_protobuf(
+    programs_by_error: &mut HashMap<Vec<String>, Vec<OutputProgram>>,
+) -> Exercises {
     let mut rng = StdRng::seed_from_u64(2048);
 
-    programs_by_error
-        .retain(|key, value| {
-            !key.contains(&String::from("E207")) && !key.contains(&String::from("E308"))
-        });
+    programs_by_error.retain(|key, value| {
+        !key.contains(&String::from("E207")) && !key.contains(&String::from("E308"))
+    });
 
     for (_, output_programs) in programs_by_error.iter_mut() {
         // Modify values in-place
@@ -47,59 +52,70 @@ fn convert_to_protobuf(programs_by_error: &mut HashMap<Vec<String>, Vec<OutputPr
         output_programs.truncate(200);
     }
 
-    let exercise_groups = programs_by_error.iter().map(|(error_vec, output_programs)| {
-        let exercises = output_programs.iter().map(|output_program| {
-            Exercise {
+    let exercise_groups = programs_by_error
+        .iter()
+        .map(|(error_vec, output_programs)| {
+            let exercises = output_programs
+                .iter()
+                .map(|output_program| Exercise {
+                    special_fields: SpecialFields::default(),
+                    formatted_program: output_program.formatted_program.clone(),
+                    program_length: output_program.skeleton.len() as i32,
+                    variable_names: output_program.variable_names.clone(),
+                    human_errors: output_program.human_messages.clone(),
+                    errors: output_program
+                        .compiler_messages
+                        .iter()
+                        .map(|compiler_message| {
+                            let message = compiler_message.message.clone();
+                            let implicated_variable_names = extract_backtick_text(&message);
+                            ErrorMessage {
+                                special_fields: SpecialFields::default(),
+                                message,
+                                implicated_variable_names,
+                                code: MessageField(Some(Box::new(
+                                    compiler_message
+                                        .clone()
+                                        .code
+                                        .map(|c| ErrorMessageCode {
+                                            special_fields: SpecialFields::default(),
+                                            code: c.code.clone(),
+                                        })
+                                        .unwrap(),
+                                ))),
+                            }
+                        })
+                        .collect(),
+                })
+                .collect();
+            ErrorExerciseGroup {
                 special_fields: SpecialFields::default(),
-                formatted_program: output_program.formatted_program.clone(),
-                errors: output_program.compiler_messages.iter().map(|compiler_message| {
-                    ErrorMessage {
-                        special_fields: SpecialFields::default(),
-                        message: compiler_message.message.clone(),
-                        code: MessageField(Some(Box::new(
-                            compiler_message.clone().code.map(|c| {
-                                ErrorMessageCode {
-                                    special_fields: SpecialFields::default(),
-                                    code: c.code.clone(),
-                                    explanation: c.explanation.unwrap()
-                                }
-                            }).unwrap()
-                        ))),
-                        spans: compiler_message.spans.iter().map(|span| ErrorMessageSpan {
-                            special_fields: SpecialFields::default(),
-                            line_start: span.line_start,
-                            line_end: span.line_end,
-                            column_start: span.column_start,
-                            column_end: span.column_end
-                        }).collect()
-                    }
-                }).collect()
+                error_codes: error_vec.clone(),
+                exercises,
             }
-        }).collect();
-        ErrorExerciseGroup {
-            special_fields: SpecialFields::default(),
-            error_codes: error_vec.clone(),
-            exercises
-        }
-    }).collect();
+        })
+        .collect();
 
     Exercises {
         special_fields: SpecialFields::default(),
-        exercise_groups
+        exercise_groups,
     }
 }
 
 fn group_programs_by_error() -> HashMap<Vec<String>, Vec<OutputProgram>> {
-    let results: Vec<(Vec<String>, OutputProgram)> = (0..10000)
+    let results: Vec<(Vec<String>, OutputProgram)> = (0..1000)
         .into_par_iter()
         .filter_map(|i| {
             let seed = 42 * i;
             let mut rng = StdRng::seed_from_u64(seed);
 
-            let (program, skeleton, outline, errors) = create_and_check(&mut rng);
+            let (program, skeleton, outline, available_variables, errors, human_errors) =
+                create_and_check(&mut rng);
             if errors.len() > 2 {
                 return None;
             }
+            // println!("{}", program);
+            // println!("{:?}", errors);
 
             let mut error_codes: Vec<String> = errors
                 .iter()
@@ -108,25 +124,44 @@ fn group_programs_by_error() -> HashMap<Vec<String>, Vec<OutputProgram>> {
             error_codes.dedup();
             error_codes.sort();
 
-            Some((error_codes, OutputProgram {
-                compiler_messages: errors,
-                skeleton,
-                outline,
-                formatted_program: program,
-                seed
-            }))
+            Some((
+                error_codes,
+                OutputProgram {
+                    compiler_messages: errors,
+                    human_messages: human_errors,
+                    skeleton,
+                    outline,
+                    formatted_program: program,
+                    seed,
+                    variable_names: available_variables.names(),
+                },
+            ))
         })
         .collect();
 
     let mut programs_by_error: HashMap<Vec<String>, Vec<OutputProgram>> = HashMap::new();
     for (error_codes, program) in results {
-        programs_by_error.entry(error_codes).or_default().push(program);
+        programs_by_error
+            .entry(error_codes)
+            .or_default()
+            .push(program);
     }
 
     let program_count_by_error = programs_by_error
         .iter()
         .map(|(error, programs)| {
-            (error, programs.len(), programs.iter().map(|p| p.skeleton.clone()).collect::<Vec<_>>(), programs.iter().map(|p| p.formatted_program.clone()).collect::<Vec<_>>())
+            (
+                error,
+                programs.len(),
+                programs
+                    .iter()
+                    .map(|p| p.skeleton.clone())
+                    .collect::<Vec<_>>(),
+                programs
+                    .iter()
+                    .map(|p| p.formatted_program.clone())
+                    .collect::<Vec<_>>(),
+            )
         })
         .collect::<Vec<_>>();
 
@@ -145,33 +180,39 @@ fn group_programs_by_error() -> HashMap<Vec<String>, Vec<OutputProgram>> {
     programs_by_error
 }
 
-fn create_and_check(rng: &mut StdRng) -> (String, Vec<ExecutionSkeleton>, Vec<OutlineStatement>, Vec<crate::checker::CompilerMessage>) {
-    let (skeleton, outline, formatted_program) = create_program(rng);
-    let messages = check_rust_code(&*formatted_program).unwrap();
+fn create_and_check(
+    rng: &mut StdRng,
+) -> (
+    String,
+    Vec<ExecutionSkeleton>,
+    Vec<OutlineStatement>,
+    AvailableVariables,
+    Vec<CompilerMessage>,
+    Vec<String>
+) {
+    let (skeleton, outline, available_variables, formatted_program) = create_program(rng);
+    let (json_messages, human_messages) = check_rust_code(&*formatted_program).unwrap();
     (
         formatted_program,
         skeleton,
         outline,
-        messages
-            .iter()
-            .filter_map(|message| match message.code {
-                None => None,
-                Some(_) => {
-                    if message.level == "error" {
-                        Some(message.clone())
-                    } else {
-                        None
-                    }
-                }
-            })
-            .collect(),
+        available_variables,
+        json_messages,
+        human_messages
     )
 }
 
-fn create_program(mut rng: &mut StdRng) -> (Vec<ExecutionSkeleton>, Vec<OutlineStatement>, String) {
+fn create_program(
+    mut rng: &mut StdRng,
+) -> (
+    Vec<ExecutionSkeleton>,
+    Vec<OutlineStatement>,
+    AvailableVariables,
+    String,
+) {
     let skeleton = fill_skeleton(&mut rng);
-    let outline = fill_outline(&mut rng, &skeleton);
-    let program = render_program(&outline);
+    let (outline, available_variables) = fill_outline(&mut rng, &skeleton);
+    let program = render_program(&outline, &mut rng);
 
     let formatted_program = match format_rust_code(&*program.join("\n")) {
         Ok(formatted_program) => formatted_program,
@@ -180,6 +221,5 @@ fn create_program(mut rng: &mut StdRng) -> (Vec<ExecutionSkeleton>, Vec<OutlineS
         }
     };
 
-    (skeleton, outline, formatted_program)
+    (skeleton, outline, available_variables, formatted_program)
 }
-
